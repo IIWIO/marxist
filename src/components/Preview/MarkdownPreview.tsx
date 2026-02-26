@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useMarkdownParser } from '@/hooks/useMarkdownParser'
+import { useScrollSyncContext } from '@/contexts/ScrollSyncContext'
 
 import '@/styles/github-markdown.css'
 import '@/styles/highlight-themes/github-light.css'
@@ -19,6 +20,7 @@ export default function MarkdownPreview({
   onLinkClick,
 }: MarkdownPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const scrollSync = useScrollSyncContext()
   const { html, isProcessing, error } = useMarkdownParser(content)
 
   const handleClick = useCallback(
@@ -60,6 +62,16 @@ export default function MarkdownPreview({
     })
   }, [html])
 
+  useEffect(() => {
+    if (!scrollSync || !containerRef.current) return
+
+    scrollSync.registerPreviewScroller(containerRef.current)
+
+    return () => {
+      scrollSync.registerPreviewScroller(null)
+    }
+  }, [scrollSync])
+
   if (error) {
     return (
       <div className="p-6 text-red-500 dark:text-red-400">
@@ -74,7 +86,7 @@ export default function MarkdownPreview({
       ref={containerRef}
       className={`
         markdown-body
-        h-full w-full overflow-auto p-6
+        h-full w-full overflow-auto p-16
         bg-preview-light dark:bg-preview-dark
         ${isProcessing ? 'opacity-75' : ''}
       `}

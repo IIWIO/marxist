@@ -23,11 +23,7 @@ export const lightHighlightStyle = HighlightStyle.define([
 
   { tag: tags.meta, color: '#546E7A' },
 
-  { tag: tags.content, color: '#37474F' },
-
   { tag: tags.quote, color: '#43A047', fontStyle: 'italic' },
-
-  { tag: tags.list, color: '#F57F17' },
 
   { tag: tags.contentSeparator, color: '#BDBDBD' },
 

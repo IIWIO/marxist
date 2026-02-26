@@ -37,10 +37,18 @@ export const createEditorTheme = (isDark: boolean, fontSize: number) => {
         fontSize: `${fontSize}px`,
         fontFamily: "'IBM Plex Mono', monospace",
         height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      },
+      '.cm-scroller': {
+        overflow: 'auto',
+        flex: '1 1 0',
+        minHeight: 0,
+        fontFamily: "'IBM Plex Mono', monospace",
       },
       '.cm-content': {
         caretColor: colors.cursor,
-        padding: '16px 0',
+        padding: '64px',
         fontFamily: "'IBM Plex Mono', monospace",
         lineHeight: '1.6',
       },
@@ -119,16 +127,19 @@ export const createEditorTheme = (isDark: boolean, fontSize: number) => {
         border: `1px solid ${colors.gutterBorder}`,
         borderRadius: '4px',
       },
-      '&::-webkit-scrollbar': {
+      '.cm-scroller::-webkit-scrollbar': {
         width: '8px',
         height: '8px',
       },
-      '&::-webkit-scrollbar-thumb': {
+      '.cm-scroller::-webkit-scrollbar-thumb': {
         backgroundColor: isDark ? '#444444' : '#CCCCCC',
         borderRadius: '4px',
       },
-      '&::-webkit-scrollbar-thumb:hover': {
+      '.cm-scroller::-webkit-scrollbar-thumb:hover': {
         backgroundColor: isDark ? '#555555' : '#BBBBBB',
+      },
+      '.cm-line': {
+        color: colors.foreground,
       },
     },
     { dark: isDark }

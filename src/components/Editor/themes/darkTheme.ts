@@ -23,11 +23,7 @@ export const darkHighlightStyle = HighlightStyle.define([
 
   { tag: tags.meta, color: '#78909C' },
 
-  { tag: tags.content, color: '#B0BEC5' },
-
   { tag: tags.quote, color: '#81C784', fontStyle: 'italic' },
-
-  { tag: tags.list, color: '#FFD54F' },
 
   { tag: tags.contentSeparator, color: '#616161' },
 

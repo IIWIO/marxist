@@ -20,6 +20,7 @@ interface EditorStoreState {
     scrollPosition: number
   }) => string
   closeTab: (tabId: string) => void
+  closeAllTabs: () => void
   setActiveTab: (tabId: string) => void
   updateTabContent: (tabId: string, content: string) => void
   updateTabEditorState: (tabId: string, state: EditorState | null, scroll?: number, cursor?: number) => void
@@ -178,6 +179,16 @@ export const useEditorStore = create<EditorStoreState>()(
         activeTabId: newActiveTabId,
         wordCount: newActiveTab ? calculateWordCount(newActiveTab.content) : 0,
         letterCount: newActiveTab ? calculateLetterCount(newActiveTab.content) : 0,
+      })
+    },
+
+    closeAllTabs: () => {
+      set({
+        tabs: new Map(),
+        activeTabId: null,
+        wordCount: 0,
+        letterCount: 0,
+        untitledCounter: 0,
       })
     },
 

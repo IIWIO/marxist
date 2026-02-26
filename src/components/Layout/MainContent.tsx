@@ -122,10 +122,10 @@ export default function MainContent({
       <FileSidebar />
 
       <div
-        className="h-full transition-[margin-left] duration-200 ease-out"
+        className="h-full overflow-hidden transition-[margin-left,margin-right] duration-200 ease-out"
         style={{
           marginLeft: `${sidebarOffset}px`,
-          paddingRight: aiPanelOpen ? '360px' : 0,
+          marginRight: aiPanelOpen ? '360px' : 0,
         }}
       >
         {renderContent()}

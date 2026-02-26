@@ -11,6 +11,7 @@ import { search, highlightSelectionMatches } from '@codemirror/search'
 import { bracketMatching } from '@codemirror/language'
 import { markdownExtension } from './markdown'
 import { allKeymaps } from './keybindings'
+import { listMarkerHighlight } from './listMarkerHighlight'
 import { createEditorTheme, lightSyntaxHighlighting, darkSyntaxHighlighting } from '../themes'
 
 export interface ExtensionConfig {
@@ -41,6 +42,8 @@ export function createExtensions(config: ExtensionConfig): Extension[] {
     createEditorTheme(config.isDark, config.fontSize),
 
     config.isDark ? darkSyntaxHighlighting : lightSyntaxHighlighting,
+
+    listMarkerHighlight(config.isDark),
   ]
 
   if (config.showLineNumbers) {

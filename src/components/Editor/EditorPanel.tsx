@@ -38,7 +38,7 @@ export default function EditorPanel({
     <div className="relative h-full w-full bg-editor-light dark:bg-editor-dark flex flex-col">
       <DiffBanner />
 
-      <div className={`flex-1 relative ${hasBanner ? '' : ''}`}>
+      <div className={`flex-1 relative overflow-hidden ${hasBanner ? '' : ''}`}>
         {showCornerIcons && (
           <EditorCornerIcons content={content} showBurger={true} showCopy={true} showAI={true} />
         )}

@@ -16,7 +16,7 @@ export default function AIPanelHeader() {
       <div className="flex items-center gap-2">
         <Icon name="smart_toy" size={20} className="text-accent dark:text-accent-dark" />
         <span className="font-medium text-sm text-text-primary-light dark:text-text-primary-dark">
-          AI Assistant
+          Carl
         </span>
         <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
           · {modelDisplayName}

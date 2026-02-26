@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { useCodeMirror } from '@/hooks/useCodeMirror'
+import { useScrollSyncContext } from '@/contexts/ScrollSyncContext'
 import type { EditorRef } from '@/types/editor'
 
 interface MarkdownEditorProps {
@@ -24,6 +25,7 @@ export default function MarkdownEditor({
   editorRef,
 }: MarkdownEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const scrollSync = useScrollSyncContext()
 
   const editor = useCodeMirror(containerRef, {
     initialContent: content,
@@ -48,7 +50,24 @@ export default function MarkdownEditor({
     }
   }, [content, editor])
 
+  useEffect(() => {
+    if (!scrollSync || !containerRef.current) return
+
+    const scroller = containerRef.current.querySelector('.cm-scroller') as HTMLElement | null
+    if (scroller) {
+      scrollSync.registerEditorScroller(scroller)
+    }
+
+    return () => {
+      scrollSync.registerEditorScroller(null)
+    }
+  }, [scrollSync, editor])
+
   return (
-    <div ref={containerRef} className="h-full w-full overflow-hidden" data-testid="markdown-editor" />
+    <div 
+      ref={containerRef} 
+      className="h-full w-full overflow-hidden" 
+      data-testid="markdown-editor" 
+    />
   )
 }

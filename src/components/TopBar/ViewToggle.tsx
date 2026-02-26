@@ -13,7 +13,7 @@ export default function ViewToggle() {
 
   return (
     <div
-      className="relative flex items-center h-7 bg-gray-100 dark:bg-gray-800 rounded-full p-0.5"
+      className="relative flex items-center h-7 bg-gray-100 dark:bg-editor-dark rounded-full p-0.5"
       style={{ width: '240px' }}
       role="tablist"
       aria-label="View mode"
