@@ -1,0 +1,84 @@
+@import 'github-markdown-css/github-markdown.css';
+
+.markdown-body {
+  --color-canvas-default: transparent;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210, 18%, 87%, 0.5);
+}
+
+.dark .markdown-body {
+  --color-canvas-default: transparent;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  color-scheme: dark;
+}
+
+.markdown-body pre {
+  position: relative;
+}
+
+.markdown-body .copy-code-button {
+  display: none !important;
+}
+
+.markdown-body input[type='checkbox'] {
+  margin-right: 0.5em;
+  pointer-events: none;
+}
+
+.markdown-body li.task-list-item {
+  list-style-type: none;
+  margin-left: -1.5em;
+}
+
+.markdown-body .footnotes {
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid var(--color-border-default);
+  font-size: 0.875em;
+}
+
+.markdown-body .footnotes-sep {
+  display: none;
+}
+
+.markdown-body table {
+  display: table;
+  width: 100%;
+  overflow: auto;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  padding: 8px 16px;
+}
+
+.markdown-body a {
+  cursor: pointer;
+}
+
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+}
+
+.markdown-body blockquote {
+  border-left: 4px solid var(--color-border-default);
+  padding-left: 1em;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.markdown-body hr {
+  height: 2px;
+  padding: 0;
+  margin: 24px 0;
+  background-color: var(--color-border-default);
+  border: 0;
+}

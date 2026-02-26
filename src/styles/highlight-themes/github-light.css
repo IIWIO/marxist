@@ -1,0 +1,73 @@
+.hljs {
+  color: #24292f;
+  background: #f6f8fa;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #6e7781;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal {
+  color: #cf222e;
+}
+
+.hljs-name,
+.hljs-tag {
+  color: #116329;
+}
+
+.hljs-attr,
+.hljs-attribute {
+  color: #0550ae;
+}
+
+.hljs-string,
+.hljs-doctag,
+.hljs-regexp {
+  color: #0a3069;
+}
+
+.hljs-number,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: #0550ae;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #0550ae;
+}
+
+.hljs-function,
+.hljs-title {
+  color: #8250df;
+}
+
+.hljs-variable,
+.hljs-template-variable {
+  color: #953800;
+}
+
+.hljs-symbol,
+.hljs-bullet {
+  color: #0550ae;
+}
+
+.hljs-section {
+  color: #0550ae;
+  font-weight: bold;
+}
+
+.hljs-addition {
+  color: #116329;
+  background-color: #dafbe1;
+}
+
+.hljs-deletion {
+  color: #82071e;
+  background-color: #ffebe9;
+}
