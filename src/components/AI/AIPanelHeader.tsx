@@ -14,7 +14,6 @@ export default function AIPanelHeader() {
   return (
     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center gap-2">
-        <Icon name="smart_toy" size={20} className="text-accent dark:text-accent-dark" />
         <span className="font-medium text-sm text-text-primary-light dark:text-text-primary-dark">
           Carl
         </span>
@@ -23,35 +22,23 @@ export default function AIPanelHeader() {
         </span>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         <Tooltip content="Reset conversation">
           <button
             onClick={resetConversation}
-            className="
-              p-1.5 rounded-lg
-              text-text-secondary-light dark:text-text-secondary-dark
-              hover:text-text-primary-light dark:hover:text-text-primary-dark
-              hover:bg-gray-100 dark:hover:bg-gray-700
-              transition-colors
-            "
+            className="p-1 transition-opacity hover:opacity-100"
             aria-label="Reset conversation"
           >
-            <Icon name="refresh" size={18} />
+            <Icon name="refresh" size={22} className="brightness-50 hover:brightness-200" />
           </button>
         </Tooltip>
 
         <button
           onClick={toggleAiPanel}
-          className="
-            p-1.5 rounded-lg
-            text-text-secondary-light dark:text-text-secondary-dark
-            hover:text-text-primary-light dark:hover:text-text-primary-dark
-            hover:bg-gray-100 dark:hover:bg-gray-700
-            transition-colors
-          "
+          className="p-1 transition-opacity hover:opacity-100"
           aria-label="Close AI panel"
         >
-          <Icon name="close" size={18} />
+          <Icon name="close" size={22} className="brightness-50 hover:brightness-200" />
         </button>
       </div>
     </div>

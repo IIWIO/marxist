@@ -4,56 +4,24 @@
 
 @font-face {
   font-family: 'Google Sans Flex';
-  src: url('/assets/fonts/GoogleSansFlex-Regular.woff2') format('woff2');
-  font-weight: 400;
+  src: url('/assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf') format('truetype');
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Google Sans Flex';
-  src: url('/assets/fonts/GoogleSansFlex-Medium.woff2') format('woff2');
-  font-weight: 500;
+  font-family: 'Google Sans Code';
+  src: url('/assets/fonts/GoogleSansCode-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Google Sans Flex';
-  src: url('/assets/fonts/GoogleSansFlex-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'IBM Plex Mono';
-  src: url('/assets/fonts/IBMPlexMono-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'IBM Plex Mono';
-  src: url('/assets/fonts/IBMPlexMono-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'IBM Plex Mono';
-  src: url('/assets/fonts/IBMPlexMono-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'IBM Plex Mono';
-  src: url('/assets/fonts/IBMPlexMono-Italic.woff2') format('woff2');
-  font-weight: 400;
+  font-family: 'Google Sans Code';
+  src: url('/assets/fonts/GoogleSansCode-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
   font-style: italic;
   font-display: swap;
 }
@@ -78,20 +46,21 @@ body {
   user-select: none;
 }
 
-.dark ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.scrollbar-autohide::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
-.dark ::-webkit-scrollbar-track {
+.scrollbar-autohide::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #444;
-  border-radius: 4px;
+.scrollbar-autohide::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.3s ease;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+.scrollbar-autohide.is-scrolling::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
 }

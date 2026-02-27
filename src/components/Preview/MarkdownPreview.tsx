@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useMarkdownParser } from '@/hooks/useMarkdownParser'
 import { useScrollSyncContext } from '@/contexts/ScrollSyncContext'
+import { useScrollbarAutohide } from '@/hooks/useScrollbarAutohide'
 
 import '@/styles/github-markdown.css'
 import '@/styles/highlight-themes/github-light.css'
@@ -22,6 +23,8 @@ export default function MarkdownPreview({
   const containerRef = useRef<HTMLDivElement>(null)
   const scrollSync = useScrollSyncContext()
   const { html, isProcessing, error } = useMarkdownParser(content)
+
+  useScrollbarAutohide(containerRef)
 
   const handleClick = useCallback(
     (e: MouseEvent) => {

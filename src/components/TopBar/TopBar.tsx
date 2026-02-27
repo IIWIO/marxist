@@ -47,9 +47,9 @@ export default function TopBar({
       </div>
 
       <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-        {showFormattingToolbar && (
-          <FormattingToolbar onAction={executeAction} windowWidth={windowWidth} disabled={false} />
-        )}
+        <div style={{ visibility: showFormattingToolbar ? 'visible' : 'hidden' }}>
+          <FormattingToolbar onAction={executeAction} windowWidth={windowWidth} disabled={!showFormattingToolbar} />
+        </div>
 
         <div className="w-px h-4 bg-gray-300 dark:bg-gray-600" />
 

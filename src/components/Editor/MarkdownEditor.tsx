@@ -63,6 +63,31 @@ export default function MarkdownEditor({
     }
   }, [scrollSync, editor])
 
+  // Auto-hide scrollbar on scroll
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const scroller = containerRef.current.querySelector('.cm-scroller') as HTMLElement | null
+    if (!scroller) return
+
+    let timeout: ReturnType<typeof setTimeout> | null = null
+
+    const handleScroll = () => {
+      scroller.classList.add('is-scrolling')
+      if (timeout) clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        scroller.classList.remove('is-scrolling')
+      }, 1000)
+    }
+
+    scroller.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      scroller.removeEventListener('scroll', handleScroll)
+      if (timeout) clearTimeout(timeout)
+    }
+  }, [editor])
+
   return (
     <div 
       ref={containerRef} 

@@ -35,7 +35,7 @@ export const createEditorTheme = (isDark: boolean, fontSize: number) => {
         backgroundColor: colors.background,
         color: colors.foreground,
         fontSize: `${fontSize}px`,
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontFamily: "'Google Sans Code', monospace",
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -44,12 +44,12 @@ export const createEditorTheme = (isDark: boolean, fontSize: number) => {
         overflow: 'auto',
         flex: '1 1 0',
         minHeight: 0,
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontFamily: "'Google Sans Code', monospace",
       },
       '.cm-content': {
         caretColor: colors.cursor,
         padding: '64px',
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontFamily: "'Google Sans Code', monospace",
         lineHeight: '1.6',
       },
       '.cm-cursor, .cm-dropCursor': {
@@ -128,15 +128,19 @@ export const createEditorTheme = (isDark: boolean, fontSize: number) => {
         borderRadius: '4px',
       },
       '.cm-scroller::-webkit-scrollbar': {
-        width: '8px',
-        height: '8px',
+        width: '5px',
+        height: '5px',
+      },
+      '.cm-scroller::-webkit-scrollbar-track': {
+        background: 'transparent',
       },
       '.cm-scroller::-webkit-scrollbar-thumb': {
-        backgroundColor: isDark ? '#444444' : '#CCCCCC',
-        borderRadius: '4px',
+        backgroundColor: 'transparent',
+        borderRadius: '3px',
+        transition: 'background-color 0.3s ease',
       },
-      '.cm-scroller::-webkit-scrollbar-thumb:hover': {
-        backgroundColor: isDark ? '#555555' : '#BBBBBB',
+      '.cm-scroller.is-scrolling::-webkit-scrollbar-thumb': {
+        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)',
       },
       '.cm-line': {
         color: colors.foreground,

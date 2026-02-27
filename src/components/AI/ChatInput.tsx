@@ -1,9 +1,8 @@
 import { useState, useCallback, useRef, KeyboardEvent } from 'react'
 import Icon from '@/components/common/Icon'
-import Tooltip from '@/components/common/Tooltip'
-import { useAIChat } from '@/hooks/useAIChat'
-import { useAIEdit } from '@/hooks/useAIEdit'
+import { useAIAgent } from '@/hooks/useAIAgent'
 import { useAIStore } from '@/stores/aiStore'
+import { useEditorStore } from '@/stores/editorStore'
 
 interface ChatInputProps {
   disabled?: boolean
@@ -11,13 +10,13 @@ interface ChatInputProps {
 
 export default function ChatInput({ disabled }: ChatInputProps) {
   const [input, setInput] = useState('')
-  const [isEditMode, setIsEditMode] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const { sendMessage, cancelStream } = useAIChat()
-  const { startEdit, isEditing } = useAIEdit()
+  const { sendPrompt, cancelRequest } = useAIAgent()
   const isLoading = useAIStore((s) => s.isLoading)
   const isStreaming = useAIStore((s) => s.isStreaming)
+  const activeTab = useEditorStore((s) => s.getActiveTab())
+  const isEditing = activeTab?.isAIEditing || false
 
   const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current
@@ -30,17 +29,13 @@ export default function ChatInput({ disabled }: ChatInputProps) {
   const handleSend = useCallback(() => {
     if (!input.trim() || isLoading || disabled || isEditing) return
 
-    if (isEditMode) {
-      startEdit(input.trim())
-    } else {
-      sendMessage(input.trim())
-    }
+    sendPrompt(input.trim())
     setInput('')
 
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
-  }, [input, isLoading, disabled, isEditing, isEditMode, sendMessage, startEdit])
+  }, [input, isLoading, disabled, isEditing, sendPrompt])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -53,8 +48,8 @@ export default function ChatInput({ disabled }: ChatInputProps) {
   )
 
   const handleCancel = useCallback(() => {
-    cancelStream()
-  }, [cancelStream])
+    cancelRequest()
+  }, [cancelRequest])
 
   return (
     <div className="p-4 border-t border-gray-200 dark:border-gray-700">
@@ -70,50 +65,26 @@ export default function ChatInput({ disabled }: ChatInputProps) {
           placeholder={
             disabled
               ? 'Verify API key in Settings'
-              : isEditMode
-                ? 'Describe what to change in the document...'
-                : 'Ask about your document...'
+              : 'Ask or edit...'
           }
           disabled={disabled || isLoading || isEditing}
           rows={1}
-          className={`
-            w-full px-4 py-3 pr-24
+          className="
+            w-full px-4 py-3 pr-14
             rounded-xl border
             bg-gray-50 dark:bg-gray-800
+            border-gray-200 dark:border-gray-600
             text-sm text-text-primary-light dark:text-text-primary-dark
             placeholder-gray-400
             resize-none
             focus:outline-none focus:ring-2
+            focus:ring-accent/20 dark:focus:ring-accent-dark/20
+            focus:border-accent dark:focus:border-accent-dark
             disabled:opacity-50 disabled:cursor-not-allowed
-            ${
-              isEditMode
-                ? 'border-amber-400 dark:border-amber-600 focus:ring-amber-500/20 focus:border-amber-500'
-                : 'border-gray-200 dark:border-gray-600 focus:ring-accent/20 dark:focus:ring-accent-dark/20 focus:border-accent dark:focus:border-accent-dark'
-            }
-          `}
+          "
         />
 
-        <div className="absolute right-3 bottom-3 flex items-center gap-1">
-          <Tooltip content={isEditMode ? 'Edit mode (modifies document)' : 'Chat mode (conversation only)'}>
-            <button
-              onClick={() => setIsEditMode(!isEditMode)}
-              disabled={isLoading || isEditing}
-              className={`
-                p-1.5 rounded-lg transition-colors
-                ${
-                  isEditMode
-                    ? 'text-amber-500 bg-amber-100 dark:bg-amber-900/30'
-                    : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark'
-                }
-                hover:bg-gray-100 dark:hover:bg-gray-700
-                disabled:opacity-50 disabled:cursor-not-allowed
-              `}
-              aria-label={isEditMode ? 'Switch to chat mode' : 'Switch to edit mode'}
-            >
-              <Icon name={isEditMode ? 'edit_document' : 'chat'} size={18} />
-            </button>
-          </Tooltip>
-
+        <div className="absolute right-3 bottom-3 flex items-center">
           <button
             onClick={isStreaming ? handleCancel : handleSend}
             disabled={disabled || isEditing || (!input.trim() && !isStreaming)}
@@ -128,20 +99,13 @@ export default function ChatInput({ disabled }: ChatInputProps) {
                     : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
               }
             `}
-            aria-label={isStreaming ? 'Cancel' : 'Send message'}
+            aria-label={isStreaming ? 'Cancel' : 'Send'}
           >
             <Icon name={isStreaming ? 'stop_circle' : 'send'} size={20} />
           </button>
         </div>
       </div>
 
-      <p className="mt-2 text-xs text-text-secondary-light dark:text-text-secondary-dark">
-        {isEditMode ? (
-          <span className="text-amber-600 dark:text-amber-400">Edit mode: AI will modify your document</span>
-        ) : (
-          'Press Enter to send, Shift+Enter for new line'
-        )}
-      </p>
     </div>
   )
 }
