@@ -2,9 +2,12 @@
 
 .markdown-body {
   --color-canvas-default: transparent;
-  --color-canvas-subtle: #f6f8fa;
+  --color-canvas-subtle: #f0f0f0;
   --color-border-default: #d0d7de;
   --color-border-muted: hsla(210, 18%, 87%, 0.5);
+  --color-fg-default: #1a1a1a;
+  --color-fg-muted: #4a4a4a;
+  color: #1a1a1a;
 }
 
 .dark .markdown-body {
@@ -12,6 +15,9 @@
   --color-canvas-subtle: #161b22;
   --color-border-default: #30363d;
   --color-border-muted: #21262d;
+  --color-fg-default: #e0e0e0;
+  --color-fg-muted: #888888;
+  color: #e0e0e0;
   color-scheme: dark;
 }
 
@@ -89,6 +95,37 @@
 .markdown-body img {
   max-width: 100%;
   height: auto;
+}
+
+/* Code blocks styling for light mode */
+.markdown-body pre {
+  background-color: #f0f0f0;
+  border-radius: 6px;
+}
+
+.markdown-body pre code {
+  color: #333333;
+  background-color: transparent;
+}
+
+.markdown-body code {
+  background-color: #f0f0f0;
+  color: #333333;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+}
+
+.dark .markdown-body pre {
+  background-color: #161b22;
+}
+
+.dark .markdown-body pre code {
+  color: #e0e0e0;
+}
+
+.dark .markdown-body code {
+  background-color: #161b22;
+  color: #e0e0e0;
 }
 
 .markdown-body blockquote {

@@ -61,6 +61,28 @@ body {
   transition: background 0.3s ease;
 }
 
+/* Icon styling for light/dark mode */
+.icon-default {
+  filter: brightness(0) saturate(100%) invert(40%) sepia(0%) saturate(0%) hue-rotate(0deg);
+}
+
+.icon-default:hover {
+  filter: brightness(0) saturate(100%) invert(28%) sepia(98%) saturate(1679%) hue-rotate(215deg) brightness(102%) contrast(101%);
+}
+
+.dark .icon-default {
+  filter: brightness(0.5);
+}
+
+.dark .icon-default:hover {
+  filter: brightness(1);
+}
+
+/* Light mode scrollbar */
 .scrollbar-autohide.is-scrolling::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.dark .scrollbar-autohide.is-scrolling::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.08);
 }

@@ -72,8 +72,8 @@ export default function ChatInput({ disabled }: ChatInputProps) {
           className="
             w-full px-4 py-3 pr-14
             rounded-xl border
-            bg-gray-50 dark:bg-gray-800
-            border-gray-200 dark:border-gray-600
+            bg-blue-50 dark:bg-gray-800
+            border-blue-200 dark:border-gray-600
             text-sm text-text-primary-light dark:text-text-primary-dark
             placeholder-gray-400
             resize-none

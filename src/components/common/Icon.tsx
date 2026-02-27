@@ -139,7 +139,7 @@ export default function Icon({ name, size = 20, className = '', style }: IconPro
     <img
       src={iconSrc}
       alt=""
-      className={`inline-block select-none transition-all duration-150 brightness-50 hover:brightness-100 ${className}`}
+      className={`inline-block select-none transition-all duration-150 icon-default ${className}`}
       style={{
         width: adjustedSize,
         height: adjustedSize,
