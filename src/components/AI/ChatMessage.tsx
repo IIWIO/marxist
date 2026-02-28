@@ -24,10 +24,10 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         `}
       >
         {isUser ? (
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          <p className="text-xs whitespace-pre-wrap">{message.content}</p>
         ) : (
           <div
-            className="text-sm prose prose-sm dark:prose-invert max-w-none
+            className="text-xs prose prose-sm dark:prose-invert max-w-none
               prose-p:my-1 prose-headings:my-2 prose-pre:my-2 prose-ul:my-1 prose-ol:my-1
               prose-code:text-xs prose-code:px-1 prose-code:py-0.5 prose-code:rounded
               prose-code:bg-gray-200 prose-code:dark:bg-gray-700"
