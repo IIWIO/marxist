@@ -64,7 +64,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
         editorFontSize: settings.editorFontSize,
         previewFontSize: settings.previewFontSize,
         openRouterApiKey: settings.openRouterApiKey,
-        selectedModel: settings.selectedModel,
+        selectedModel: settings.selectedModel || 'anthropic/claude-sonnet-4-20250514',
         systemPrompt: settings.systemPrompt || DEFAULT_SYSTEM_PROMPT,
         lineNumbers: settings.lineNumbers,
         wordWrap: settings.wordWrap,

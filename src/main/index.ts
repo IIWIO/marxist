@@ -627,7 +627,7 @@ function registerIpcHandlers(): void {
             'X-Title': 'Marxist',
           },
           body: JSON.stringify({
-            model: params.model,
+            model: params.model || 'anthropic/claude-sonnet-4-20250514',
             messages,
             stream: true,
           }),
@@ -759,7 +759,7 @@ Return ONLY the JSON array of replacements:`
             'X-Title': 'Marxist',
           },
           body: JSON.stringify({
-            model: params.model,
+            model: params.model || 'anthropic/claude-sonnet-4-20250514',
             messages: [{ role: 'user', content: editSystemPrompt }],
             stream: true,
           }),
