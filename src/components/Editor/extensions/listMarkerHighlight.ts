@@ -1,10 +1,11 @@
 import { Extension } from '@codemirror/state'
 import { ViewPlugin, Decoration, DecorationSet, EditorView, ViewUpdate } from '@codemirror/view'
 
-const listMarkerDeco = Decoration.mark({ class: 'cm-list-marker' })
+const bulletMarkerDeco = Decoration.mark({ class: 'cm-bullet-marker' })
+const numberMarkerDeco = Decoration.mark({ class: 'cm-number-marker' })
 
 function findListMarkers(view: EditorView): DecorationSet {
-  const decorations: { from: number; to: number }[] = []
+  const decorations: { from: number; to: number; type: 'bullet' | 'number' }[] = []
   
   for (const { from, to } of view.visibleRanges) {
     const text = view.state.doc.sliceString(from, to)
@@ -20,7 +21,7 @@ function findListMarkers(view: EditorView): DecorationSet {
       if (bulletMatch) {
         const markerStart = pos + leadingSpaces
         const markerEnd = markerStart + 1
-        decorations.push({ from: markerStart, to: markerEnd })
+        decorations.push({ from: markerStart, to: markerEnd, type: 'bullet' })
       }
       
       // Check for numbered list markers: 1., 2., etc.
@@ -28,7 +29,7 @@ function findListMarkers(view: EditorView): DecorationSet {
       if (numberMatch) {
         const markerStart = pos + leadingSpaces
         const markerEnd = markerStart + numberMatch[1].length
-        decorations.push({ from: markerStart, to: markerEnd })
+        decorations.push({ from: markerStart, to: markerEnd, type: 'number' })
       }
       
       pos += line.length + 1 // +1 for newline
@@ -36,7 +37,11 @@ function findListMarkers(view: EditorView): DecorationSet {
   }
   
   return Decoration.set(
-    decorations.map(({ from, to }) => listMarkerDeco.range(from, to))
+    decorations.map(({ from, to, type }) => 
+      type === 'bullet' 
+        ? bulletMarkerDeco.range(from, to)
+        : numberMarkerDeco.range(from, to)
+    )
   )
 }
 
@@ -63,8 +68,11 @@ export function listMarkerHighlight(isDark: boolean): Extension {
   return [
     listMarkerPlugin,
     EditorView.theme({
-      '.cm-line .cm-list-marker': {
+      '.cm-line .cm-bullet-marker': {
         color: `${isDark ? '#FFD54F' : '#F57F17'} !important`,
+      },
+      '.cm-line .cm-number-marker': {
+        color: `${isDark ? '#FFCC80' : '#EF6C00'} !important`,
       },
     }, { dark: isDark }),
   ]

@@ -11,7 +11,7 @@ export const lightHighlightStyle = HighlightStyle.define([
 
   { tag: tags.processingInstruction, color: '#D32F2F' },
 
-  { tag: tags.strong, color: '#6A1B9A', fontWeight: 'bold' },
+  { tag: tags.strong, color: '#AD1457', fontWeight: 'bold' },
   { tag: tags.emphasis, color: '#6A1B9A', fontStyle: 'italic' },
 
   { tag: tags.strikethrough, color: '#795548', textDecoration: 'line-through' },
@@ -27,16 +27,16 @@ export const lightHighlightStyle = HighlightStyle.define([
 
   { tag: tags.contentSeparator, color: '#BDBDBD' },
 
-  { tag: tags.angleBracket, color: '#00838F' },
-  { tag: tags.tagName, color: '#00838F' },
-  { tag: tags.attributeName, color: '#00838F' },
-  { tag: tags.attributeValue, color: '#00838F' },
+  { tag: tags.angleBracket, color: '#00695C' },
+  { tag: tags.tagName, color: '#00796B' },
+  { tag: tags.attributeName, color: '#00897B' },
+  { tag: tags.attributeValue, color: '#0097A7' },
 
   { tag: tags.documentMeta, color: '#5C6BC0' },
 
   { tag: tags.punctuation, color: '#6B6B6B' },
 
-  { tag: tags.atom, color: '#F57F17' },
+  { tag: tags.atom, color: '#FBC02D' },
 ])
 
 export const lightSyntaxHighlighting = syntaxHighlighting(lightHighlightStyle)

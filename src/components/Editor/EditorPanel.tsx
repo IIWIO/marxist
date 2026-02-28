@@ -14,6 +14,7 @@ interface EditorPanelProps {
   readOnly?: boolean
   editorRef?: React.MutableRefObject<EditorRef | null>
   showCornerIcons?: boolean
+  showAIIcon?: boolean
 }
 
 export default function EditorPanel({
@@ -26,6 +27,7 @@ export default function EditorPanel({
   readOnly = false,
   editorRef,
   showCornerIcons = true,
+  showAIIcon = true,
 }: EditorPanelProps) {
   const activeTab = useEditorStore((s) => s.getActiveTab())
   const isAIEditing = activeTab?.isAIEditing || false
@@ -40,7 +42,7 @@ export default function EditorPanel({
 
       <div className={`flex-1 relative overflow-hidden ${hasBanner ? '' : ''}`}>
         {showCornerIcons && (
-          <EditorCornerIcons content={content} showBurger={true} showCopy={true} showAI={true} />
+          <EditorCornerIcons content={content} showBurger={true} showCopy={true} showAI={showAIIcon} />
         )}
 
         <MarkdownEditor

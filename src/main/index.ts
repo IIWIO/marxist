@@ -32,6 +32,8 @@ interface Settings {
   selectedModel: string
   systemPrompt: string
   recentFiles: Array<{ path: string; name: string; lastOpened: string }>
+  hasLaunchedBefore: boolean
+  isApiKeyVerified: boolean
 }
 
 const defaultSettings: Settings = {
@@ -46,6 +48,8 @@ const defaultSettings: Settings = {
   systemPrompt:
     'You are a helpful writing assistant. Help the user improve their Markdown documents. When asked to edit, return the complete modified document.',
   recentFiles: [],
+  hasLaunchedBefore: false,
+  isApiKeyVerified: false,
 }
 
 let windowStore: Store<{ windowState: WindowState }> | null = null
@@ -394,6 +398,29 @@ function registerIpcHandlers(): void {
     }
   })
 
+  ipcMain.handle('app:get-welcome-file', async () => {
+    try {
+      const store = getSettingsStore()
+      const settings = store.get('settings')
+      
+      if (settings.hasLaunchedBefore) {
+        return { isFirstRun: false, content: null }
+      }
+      
+      store.set('settings', { ...settings, hasLaunchedBefore: true })
+      
+      const welcomeFilePath = app.isPackaged
+        ? join(process.resourcesPath, 'markist_welcome.md')
+        : join(__dirname, '../../assets/markist_welcome.md')
+      
+      const content = await readFile(welcomeFilePath, 'utf-8')
+      return { isFirstRun: true, content, name: 'Welcome to Marxist.md' }
+    } catch (error) {
+      console.error('Failed to load welcome file:', error)
+      return { isFirstRun: false, content: null, error: (error as Error).message }
+    }
+  })
+
   ipcMain.handle('drafts:save', async (_, tabId: string, content: string, metadata: unknown) => {
     try {
       saveDraft(tabId, content, metadata as Parameters<typeof saveDraft>[2])
@@ -693,24 +720,25 @@ function registerIpcHandlers(): void {
       activeStreams.set(streamId, controller)
 
       try {
-        const editSystemPrompt = `You are editing a Markdown document.
+        const editSystemPrompt = `You are editing a Markdown document. Return ONLY a JSON array of search/replace operations.
 
-INSTRUCTIONS:
-1. Return the COMPLETE modified document
-2. Only change what the user asked for
-3. Return raw Markdown text - NO code fences, NO explanations
-4. Preserve all formatting and structure not related to the requested change
-5. If you cannot make the requested change, return the original document unchanged
+RULES:
+1. Return a JSON array of objects with "find" and "replace" keys
+2. The "find" value must be an EXACT match of text in the document (including whitespace)
+3. The "replace" value is what to replace it with
+4. Only include changes that are necessary for the user's request
+5. Return ONLY the JSON array - no markdown code fences, no explanations
+6. If no changes are needed, return an empty array: []
 
-User's system prompt context:
-${params.systemPrompt}
+EXAMPLE FORMAT:
+[{"find": "old text here", "replace": "new text here"}, {"find": "another old", "replace": "another new"}]
 
 CURRENT DOCUMENT:
 ${params.documentContent}
 
 USER REQUEST: ${params.instruction}
 
-Return the complete modified document below:`
+Return ONLY the JSON array of replacements:`
 
         const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
           method: 'POST',
@@ -744,7 +772,8 @@ Return the complete modified document below:`
         }
 
         const decoder = new TextDecoder()
-        let fullContent = ''
+        let fullResponse = ''
+        let documentContent = params.documentContent
 
         try {
           while (true) {
@@ -766,12 +795,7 @@ Return the complete modified document below:`
                   const content = parsed.choices?.[0]?.delta?.content || ''
 
                   if (content) {
-                    fullContent += content
-                    window.webContents.send('ai:edit-chunk', {
-                      streamId,
-                      content,
-                      fullContent,
-                    })
+                    fullResponse += content
                   }
                 } catch {
                   // Skip invalid JSON
@@ -783,11 +807,49 @@ Return the complete modified document below:`
           reader.releaseLock()
         }
 
+        // Parse the JSON response and apply replacements
+        try {
+          // Clean up the response - remove any markdown code fences if present
+          let jsonStr = fullResponse.trim()
+          if (jsonStr.startsWith('```json')) {
+            jsonStr = jsonStr.slice(7)
+          } else if (jsonStr.startsWith('```')) {
+            jsonStr = jsonStr.slice(3)
+          }
+          if (jsonStr.endsWith('```')) {
+            jsonStr = jsonStr.slice(0, -3)
+          }
+          jsonStr = jsonStr.trim()
+
+          const replacements = JSON.parse(jsonStr) as Array<{ find: string; replace: string }>
+
+          if (Array.isArray(replacements)) {
+            for (const { find, replace } of replacements) {
+              if (find && typeof find === 'string' && typeof replace === 'string') {
+                documentContent = documentContent.split(find).join(replace)
+              }
+            }
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, fall back to treating the response as the full document
+          // This handles cases where the AI doesn't follow instructions
+          if (fullResponse.trim().length > 0) {
+            documentContent = fullResponse
+          }
+        }
+
         activeStreams.delete(streamId)
 
-        window.webContents.send('ai:edit-complete', { streamId, content: fullContent })
+        // Send the final modified document
+        window.webContents.send('ai:edit-chunk', {
+          streamId,
+          content: documentContent,
+          fullContent: documentContent,
+        })
 
-        return { success: true, content: fullContent }
+        window.webContents.send('ai:edit-complete', { streamId, content: documentContent })
+
+        return { success: true, content: documentContent }
       } catch (error) {
         activeStreams.delete(streamId)
 

@@ -94,7 +94,7 @@ export default function MarkdownPreview({
         ${isProcessing ? 'opacity-75' : ''}
       `}
       style={{
-        fontSize: `${fontSize - 2}px`,
+        fontSize: `${fontSize}px`,
         lineHeight: 1.6,
       }}
       dangerouslySetInnerHTML={{ __html: html }}

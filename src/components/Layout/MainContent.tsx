@@ -10,6 +10,7 @@ import type { EditorRef } from '@/types/editor'
 interface MainContentProps {
   isDark: boolean
   fontSize?: number
+  previewFontSize?: number
   lineNumbers?: boolean
   wordWrap?: boolean
   editorRef?: React.MutableRefObject<EditorRef | null>
@@ -18,6 +19,7 @@ interface MainContentProps {
 export default function MainContent({
   isDark,
   fontSize = 14,
+  previewFontSize = 16,
   lineNumbers = false,
   wordWrap = true,
   editorRef,
@@ -92,12 +94,14 @@ export default function MainContent({
                 lineNumbers={lineNumbers}
                 wordWrap={wordWrap}
                 editorRef={editorRef}
+                showAIIcon={false}
               />
             }
             rightPanel={
               <PreviewPanel
                 content={content}
                 isDark={isDark}
+                fontSize={previewFontSize}
               />
             }
           />
@@ -108,6 +112,7 @@ export default function MainContent({
           <PreviewPanel
             content={content}
             isDark={isDark}
+            fontSize={previewFontSize}
             fullWidth
           />
         )

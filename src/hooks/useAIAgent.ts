@@ -55,7 +55,9 @@ export function useAIAgent(): UseAIAgentReturn {
 
     const unsubComplete = window.electron.onAIEvent('ai:stream-complete', () => {
       if (isEditingRef.current) {
+        setTabAIEditing(activeTabId, false)
         setTabShowDiff(activeTabId, true)
+        isEditingRef.current = false
       }
       setLoading(false)
       setStreaming(false)
@@ -85,7 +87,9 @@ export function useAIAgent(): UseAIAgentReturn {
     })
 
     const unsubEditComplete = window.electron.onAIEvent('ai:edit-complete', () => {
+      setTabAIEditing(activeTabId, false)
       setTabShowDiff(activeTabId, true)
+      isEditingRef.current = false
       setLoading(false)
       setStreaming(false)
     })
@@ -124,11 +128,13 @@ export function useAIAgent(): UseAIAgentReturn {
       const documentContent = tab.content
       const history = getHistory(activeTabId)
 
-      // Detect if this is likely an edit request
+      // Detect if this is likely an edit/write request
       const editKeywords = [
         'change', 'replace', 'update', 'modify', 'edit', 'fix', 'correct',
         'add', 'insert', 'remove', 'delete', 'convert', 'transform',
-        'make', 'turn', 'rewrite', 'reformat', 'restructure'
+        'make', 'turn', 'rewrite', 'reformat', 'restructure',
+        'write', 'create', 'generate', 'draft', 'compose', 'build',
+        'put', 'append', 'prepend', 'include'
       ]
       const lowerPrompt = prompt.toLowerCase()
       const isLikelyEdit = editKeywords.some(keyword => lowerPrompt.includes(keyword))
@@ -212,10 +218,14 @@ export function useAIAgent(): UseAIAgentReturn {
   )
 
   const cancelRequest = useCallback(async () => {
+    // Capture state before cancel (error handler may reset these)
+    const wasEditing = isEditingRef.current
+    const preEditContent = preEditContentRef.current
+
     await window.electron.ai.cancel()
 
-    if (isEditingRef.current && preEditContentRef.current && activeTabId) {
-      updateTabContent(activeTabId, preEditContentRef.current)
+    if (wasEditing && preEditContent && activeTabId) {
+      updateTabContent(activeTabId, preEditContent)
       setTabAIEditing(activeTabId, false)
       setTabShowDiff(activeTabId, false)
 

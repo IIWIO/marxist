@@ -11,32 +11,32 @@ export const darkHighlightStyle = HighlightStyle.define([
 
   { tag: tags.processingInstruction, color: '#EF5350' },
 
-  { tag: tags.strong, color: '#CE93D8', fontWeight: 'bold' },
+  { tag: tags.strong, color: '#F48FB1', fontWeight: 'bold' },
   { tag: tags.emphasis, color: '#CE93D8', fontStyle: 'italic' },
 
   { tag: tags.strikethrough, color: '#A1887F', textDecoration: 'line-through' },
 
   { tag: tags.link, color: '#64B5F6', textDecoration: 'underline' },
-  { tag: tags.url, color: '#78909C' },
+  { tag: tags.url, color: '#90A4AE' },
 
   { tag: tags.monospace, color: '#FFB74D', backgroundColor: 'rgba(255,255,255,0.04)' },
 
-  { tag: tags.meta, color: '#78909C' },
+  { tag: tags.meta, color: '#B0BEC5' },
 
   { tag: tags.quote, color: '#81C784', fontStyle: 'italic' },
 
   { tag: tags.contentSeparator, color: '#616161' },
 
-  { tag: tags.angleBracket, color: '#4DD0E1' },
-  { tag: tags.tagName, color: '#4DD0E1' },
-  { tag: tags.attributeName, color: '#4DD0E1' },
-  { tag: tags.attributeValue, color: '#4DD0E1' },
+  { tag: tags.angleBracket, color: '#26C6DA' },
+  { tag: tags.tagName, color: '#4DB6AC' },
+  { tag: tags.attributeName, color: '#80CBC4' },
+  { tag: tags.attributeValue, color: '#80DEEA' },
 
   { tag: tags.documentMeta, color: '#9FA8DA' },
 
   { tag: tags.punctuation, color: '#888888' },
 
-  { tag: tags.atom, color: '#FFD54F' },
+  { tag: tags.atom, color: '#FFEE58' },
 ])
 
 export const darkSyntaxHighlighting = syntaxHighlighting(darkHighlightStyle)

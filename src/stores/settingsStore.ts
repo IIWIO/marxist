@@ -24,7 +24,7 @@ interface SettingsState extends Settings {
   setActiveTab: (tab: SettingsState['activeTab']) => void
   loadSettings: () => Promise<void>
   updateSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => Promise<void>
-  setApiKeyVerified: (verified: boolean, models?: Settings['availableModels']) => void
+  setApiKeyVerified: (verified: boolean, models?: Settings['availableModels']) => Promise<void>
   resetToDefaults: () => Promise<void>
 }
 
@@ -70,7 +70,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
         wordWrap: settings.wordWrap,
         spellCheck: settings.spellCheck,
         isLoading: false,
-        isApiKeyVerified: false,
+        isApiKeyVerified: settings.isApiKeyVerified || false,
       })
     } catch (error) {
       console.error('Failed to load settings:', error)
@@ -91,6 +91,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
       'lineNumbers',
       'wordWrap',
       'spellCheck',
+      'isApiKeyVerified',
     ] as const
 
     if (persistableKeys.includes(key as typeof persistableKeys[number])) {
@@ -105,8 +106,13 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
     }
   },
 
-  setApiKeyVerified: (verified, models = []) => {
+  setApiKeyVerified: async (verified, models = []) => {
     set({ isApiKeyVerified: verified, availableModels: models })
+    try {
+      await window.electron.settings.set('isApiKeyVerified', verified)
+    } catch (error) {
+      console.error('Failed to save API key verification status:', error)
+    }
   },
 
   resetToDefaults: async () => {

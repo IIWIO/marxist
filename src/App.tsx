@@ -20,6 +20,7 @@ function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [editorSettings, setEditorSettings] = useState({
     fontSize: 14,
+    previewFontSize: 16,
     lineNumbers: false,
     wordWrap: true,
   })
@@ -34,6 +35,7 @@ function App() {
   const openSettingsModal = useSettingsStore((s) => s.openModal)
   const settingsTheme = useSettingsStore((s) => s.theme)
   const settingsEditorFontSize = useSettingsStore((s) => s.editorFontSize)
+  const settingsPreviewFontSize = useSettingsStore((s) => s.previewFontSize)
   const settingsLineNumbers = useSettingsStore((s) => s.lineNumbers)
   const settingsWordWrap = useSettingsStore((s) => s.wordWrap)
   const updateSetting = useSettingsStore((s) => s.updateSetting)
@@ -78,10 +80,11 @@ function App() {
 
     setEditorSettings({
       fontSize: settingsEditorFontSize,
+      previewFontSize: settingsPreviewFontSize,
       lineNumbers: settingsLineNumbers,
       wordWrap: settingsWordWrap,
     })
-  }, [settingsTheme, settingsEditorFontSize, settingsLineNumbers, settingsWordWrap])
+  }, [settingsTheme, settingsEditorFontSize, settingsPreviewFontSize, settingsLineNumbers, settingsWordWrap])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -166,6 +169,7 @@ function App() {
         <MainContent
           isDark={isDark}
           fontSize={editorSettings.fontSize}
+          previewFontSize={editorSettings.previewFontSize}
           lineNumbers={editorSettings.lineNumbers}
           wordWrap={editorSettings.wordWrap}
           editorRef={editorRef}

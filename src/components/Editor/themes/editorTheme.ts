@@ -85,9 +85,25 @@ export const createEditorTheme = (isDark: boolean, fontSize: number) => {
         backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
         color: colors.foreground,
         borderBottom: `1px solid ${colors.gutterBorder}`,
+        fontFamily: "'Google Sans Flex', sans-serif",
       },
       '.cm-panel.cm-search': {
-        padding: '8px 16px',
+        padding: '12px 16px',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '8px',
+        alignItems: 'center',
+      },
+      '.cm-panel.cm-search label': {
+        fontFamily: "'Google Sans Flex', sans-serif",
+        fontSize: '13px',
+        fontWeight: '500',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+      },
+      '.cm-panel.cm-search br': {
+        display: 'none',
       },
       '.cm-searchMatch': {
         backgroundColor: colors.searchMatch,
@@ -96,31 +112,56 @@ export const createEditorTheme = (isDark: boolean, fontSize: number) => {
       '.cm-searchMatch.cm-searchMatch-selected': {
         backgroundColor: colors.searchMatchSelected,
       },
-      '.cm-panel input, .cm-panel button': {
+      '.cm-panel input, .cm-panel button, .cm-panel label': {
         fontFamily: "'Google Sans Flex', sans-serif",
         fontSize: '13px',
       },
-      '.cm-panel input': {
-        backgroundColor: isDark ? '#333333' : '#F5F5F5',
+      '.cm-panel input[type="text"], .cm-panel input:not([type])': {
+        backgroundColor: isDark ? '#2A2A2A' : '#FFFFFF',
         color: colors.foreground,
-        border: `1px solid ${colors.gutterBorder}`,
-        borderRadius: '4px',
-        padding: '4px 8px',
+        border: `1px solid ${isDark ? '#404040' : '#D1D5DB'}`,
+        borderRadius: '8px',
+        padding: '6px 12px',
         outline: 'none',
+        minWidth: '180px',
+        transition: 'border-color 0.15s ease',
       },
-      '.cm-panel input:focus': {
+      '.cm-panel input[type="text"]:focus, .cm-panel input:not([type]):focus': {
         borderColor: isDark ? '#448AFF' : '#2962FF',
+        boxShadow: isDark ? '0 0 0 2px rgba(68, 138, 255, 0.2)' : '0 0 0 2px rgba(41, 98, 255, 0.15)',
       },
-      '.cm-panel button': {
-        backgroundColor: 'transparent',
-        color: colors.foreground,
-        border: `1px solid ${colors.gutterBorder}`,
-        borderRadius: '4px',
-        padding: '4px 12px',
+      '.cm-panel input[type="checkbox"]': {
+        width: '16px',
+        height: '16px',
+        accentColor: isDark ? '#448AFF' : '#2962FF',
         cursor: 'pointer',
       },
+      '.cm-panel button': {
+        backgroundColor: isDark ? '#2A2A2A' : '#FFFFFF',
+        color: colors.foreground,
+        border: `1px solid ${isDark ? '#404040' : '#D1D5DB'}`,
+        borderRadius: '8px',
+        padding: '6px 14px',
+        cursor: 'pointer',
+        fontWeight: '500',
+        transition: 'all 0.15s ease',
+      },
       '.cm-panel button:hover': {
-        backgroundColor: isDark ? '#333333' : '#E5E5E5',
+        backgroundColor: isDark ? '#363636' : '#F3F4F6',
+        borderColor: isDark ? '#505050' : '#9CA3AF',
+      },
+      '.cm-panel button:active': {
+        backgroundColor: isDark ? '#404040' : '#E5E7EB',
+      },
+      '.cm-panel button[name="close"]': {
+        backgroundColor: 'transparent',
+        border: 'none',
+        padding: '4px 8px',
+        opacity: '0.7',
+      },
+      '.cm-panel button[name="close"]:hover': {
+        opacity: '1',
+        backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
       },
       '.cm-tooltip': {
         backgroundColor: isDark ? '#2D2D2D' : '#FFFFFF',

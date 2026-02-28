@@ -28,9 +28,19 @@ export default function AboutSection() {
       </p>
 
       <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 w-full">
-        <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-          Built with Electron, React, and CodeMirror
+        <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-2">
+          Created with love by IIWIO
         </p>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault()
+            window.electron?.file?.openExternal?.('https://www.iiwio.com') || window.open('https://www.iiwio.com', '_blank')
+          }}
+          className="text-sm text-accent dark:text-accent-dark hover:underline"
+        >
+          www.iiwio.com
+        </a>
       </div>
     </div>
   )

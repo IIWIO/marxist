@@ -10,7 +10,7 @@ interface EditorStoreState {
   letterCount: number
   untitledCounter: number
 
-  createTab: (filePath?: string | null, content?: string) => string
+  createTab: (filePath?: string | null, content?: string, customFileName?: string) => string
   restoreTab: (tab: {
     filePath: string | null
     fileName: string
@@ -59,7 +59,7 @@ export const useEditorStore = create<EditorStoreState>()(
     letterCount: 0,
     untitledCounter: 0,
 
-    createTab: (filePath = null, content = '') => {
+    createTab: (filePath = null, content = '', customFileName?: string) => {
       let { tabs, untitledCounter } = get()
 
       if (tabs.size >= MAX_TABS) {
@@ -83,7 +83,9 @@ export const useEditorStore = create<EditorStoreState>()(
       const tabId = generateTabId()
       let fileName: string
 
-      if (filePath) {
+      if (customFileName) {
+        fileName = customFileName
+      } else if (filePath) {
         fileName = getFileNameFromPath(filePath)
       } else {
         untitledCounter = get().untitledCounter

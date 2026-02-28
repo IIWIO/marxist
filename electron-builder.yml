@@ -19,6 +19,21 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    CFBundleDocumentTypes:
+      - CFBundleTypeName: Markdown Document
+        CFBundleTypeRole: Editor
+        CFBundleTypeIconFile: file-icon
+        LSHandlerRank: Owner
+        CFBundleTypeExtensions:
+          - md
+          - markdown
+      - CFBundleTypeName: Text Document
+        CFBundleTypeRole: Editor
+        CFBundleTypeIconFile: file-icon
+        LSHandlerRank: Alternate
+        CFBundleTypeExtensions:
+          - txt
 
 dmg:
   contents:
@@ -40,3 +55,7 @@ files:
 extraResources:
   - from: "assets/fonts"
     to: "fonts"
+  - from: "assets/markist_welcome.md"
+    to: "markist_welcome.md"
+  - from: "build/file-icon.icns"
+    to: "file-icon.icns"

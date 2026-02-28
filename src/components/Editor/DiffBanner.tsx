@@ -21,7 +21,7 @@ export default function DiffBanner() {
         <div className="flex items-center gap-3 text-sm">
           <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
           <span className="font-medium text-blue-800 dark:text-blue-200">
-            Carl is editing your document...
+            Karl is editing your document...
           </span>
         </div>
         <button
@@ -52,7 +52,7 @@ export default function DiffBanner() {
     >
       <div className="flex items-center gap-4 text-sm">
         <span className="font-medium text-amber-800 dark:text-amber-200">
-          Carl made changes to your document
+            Karl made changes to your document
         </span>
       </div>
 

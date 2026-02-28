@@ -34,7 +34,12 @@ export function useSessionRestore(): SessionRestoreState {
         }
 
         if (result.tabs.length === 0) {
-          createTab(null, '')
+          const welcomeResult = await window.electron.app.getWelcomeFile()
+          if (welcomeResult.isFirstRun && welcomeResult.content) {
+            createTab(null, welcomeResult.content, welcomeResult.name || 'Welcome.md')
+          } else {
+            createTab(null, '')
+          }
           setActiveView('split')
           setState({ isRestoring: false, isRestored: true, error: null })
           return

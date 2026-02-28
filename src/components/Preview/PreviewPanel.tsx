@@ -11,7 +11,7 @@ interface PreviewPanelProps {
 
 export default function PreviewPanel({ content, isDark, fontSize = 16, fullWidth = false }: PreviewPanelProps) {
   const activeView = useViewStore(selectActiveView)
-  const showAIIcon = activeView === 'render'
+  const showAIIcon = activeView === 'render' || activeView === 'split'
 
   const handleLinkClick = (url: string) => {
     window.electron?.file?.openExternal?.(url) || window.open(url, '_blank')

@@ -15,7 +15,7 @@ export default function AIPanelHeader() {
     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center gap-2">
         <span className="font-medium text-sm text-text-primary-light dark:text-text-primary-dark">
-          Carl
+          Karl
         </span>
         <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
           · {modelDisplayName}

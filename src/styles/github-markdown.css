@@ -77,11 +77,45 @@
   display: table;
   width: 100%;
   overflow: auto;
+  border-collapse: collapse;
 }
 
 .markdown-body table th,
 .markdown-body table td {
   padding: 8px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: transparent;
+}
+
+.markdown-body table th {
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.markdown-body table tr {
+  background-color: transparent;
+}
+
+.markdown-body table tr:nth-child(2n) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dark .markdown-body table th,
+.dark .markdown-body table td {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: transparent;
+}
+
+.dark .markdown-body table th {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.dark .markdown-body table tr {
+  background-color: transparent;
+}
+
+.dark .markdown-body table tr:nth-child(2n) {
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
 .markdown-body a {
@@ -116,16 +150,16 @@
 }
 
 .dark .markdown-body pre {
-  background-color: #161b22;
+  background-color: #111111;
 }
 
 .dark .markdown-body pre code {
-  color: #e0e0e0;
+  color: #a0a0a0;
 }
 
 .dark .markdown-body code {
-  background-color: #161b22;
-  color: #e0e0e0;
+  background-color: #111111;
+  color: #a0a0a0;
 }
 
 .markdown-body blockquote {
@@ -138,7 +172,12 @@
 .markdown-body hr {
   height: 2px;
   padding: 0;
-  margin: 24px 0;
+  margin: 48px 0;
   background-color: var(--color-border-default);
   border: 0;
+}
+
+.markdown-body strong,
+.markdown-body b {
+  font-weight: 700;
 }

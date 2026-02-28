@@ -131,6 +131,7 @@ export interface ElectronAPI {
       }
     }) => Promise<{ success: boolean; error?: string }>
     readyToQuit: () => void
+    getWelcomeFile: () => Promise<{ isFirstRun: boolean; content: string | null; name?: string; error?: string }>
   }
   onMenuEvent: (channel: string, callback: () => void) => () => void
   onAppEvent: (channel: string, callback: () => void) => () => void
@@ -178,6 +179,7 @@ const electronAPI: ElectronAPI = {
     getVersion: () => ipcRenderer.invoke('app:get-version'),
     saveBeforeQuit: (data: unknown) => ipcRenderer.invoke('app:save-before-quit', data),
     readyToQuit: () => ipcRenderer.send('app:ready-to-quit'),
+    getWelcomeFile: () => ipcRenderer.invoke('app:get-welcome-file'),
   },
 
   onMenuEvent: (channel: string, callback: () => void) => {
