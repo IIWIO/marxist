@@ -11,6 +11,7 @@ import {
   restoreSession,
   getAppVersion,
 } from './services/sessionService'
+import { initAutoUpdater, checkForUpdates } from './autoUpdater'
 import type { SessionState } from '../types/session'
 
 interface WindowState {
@@ -184,6 +185,10 @@ function createMenu(mainWindow: BrowserWindow): void {
             label: app.name,
             submenu: [
               { role: 'about' as const },
+              {
+                label: 'Check for Updates...',
+                click: () => checkForUpdates(true),
+              },
               { type: 'separator' as const },
               {
                 label: 'Settings...',
@@ -302,6 +307,11 @@ function createMenu(mainWindow: BrowserWindow): void {
     {
       label: 'Help',
       submenu: [
+        {
+          label: 'Check for Updates...',
+          click: () => checkForUpdates(true),
+        },
+        { type: 'separator' },
         {
           label: 'About Marxist',
           click: () => mainWindow.webContents.send('menu:about'),
@@ -906,6 +916,16 @@ function initialize() {
     mainWindow = createWindow()
 
     createMenu(mainWindow)
+
+    // Initialize auto-updater
+    if (app.isPackaged) {
+      initAutoUpdater(mainWindow)
+    }
+
+    // IPC handler for manual update check
+    ipcMain.handle('app:check-for-updates', async () => {
+      await checkForUpdates(true)
+    })
 
     ipcMain.handle('app:save-before-quit', async (_, data: {
       drafts: Array<{
