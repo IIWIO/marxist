@@ -971,10 +971,16 @@ function initialize() {
       return
     }
     
-    if (!isQuitting && mainWindow) {
+    if (!isQuitting && mainWindow && !mainWindow.isDestroyed()) {
       event.preventDefault()
       isQuitting = true
-      mainWindow.webContents.send('app:quit-requested')
+      try {
+        mainWindow.webContents.send('app:quit-requested')
+      } catch {
+        // Window already destroyed, just exit
+        app.exit(0)
+        return
+      }
       setTimeout(() => {
         app.exit(0)
       }, 3000)
