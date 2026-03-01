@@ -3,9 +3,16 @@ import { app, dialog, BrowserWindow } from 'electron'
 
 autoUpdater.logger = console
 autoUpdater.autoDownload = false
-autoUpdater.autoInstallOnAppQuit = true
+autoUpdater.autoInstallOnAppQuit = false
 
 let mainWindow: BrowserWindow | null = null
+let updateDownloaded = false
+let downloadedUpdateInfo: UpdateInfo | null = null
+let isUpdating = false
+
+export function isInstallingUpdate(): boolean {
+  return isUpdating
+}
 
 export function initAutoUpdater(window: BrowserWindow): void {
   mainWindow = window
@@ -43,6 +50,8 @@ export function initAutoUpdater(window: BrowserWindow): void {
 
   autoUpdater.on('update-downloaded', (info: UpdateInfo) => {
     console.log('Update downloaded:', info.version)
+    updateDownloaded = true
+    downloadedUpdateInfo = info
     showRestartDialog(info)
   })
 
@@ -50,6 +59,16 @@ export function initAutoUpdater(window: BrowserWindow): void {
   setTimeout(() => {
     checkForUpdates(false)
   }, 5000)
+}
+
+export function isUpdateDownloaded(): boolean {
+  return updateDownloaded
+}
+
+export function installUpdateOnQuit(): void {
+  if (updateDownloaded) {
+    autoUpdater.quitAndInstall(false, true)
+  }
 }
 
 async function showUpdateDialog(info: UpdateInfo): Promise<void> {
@@ -76,15 +95,20 @@ async function showRestartDialog(info: UpdateInfo): Promise<void> {
     type: 'info',
     title: 'Update Ready',
     message: 'Update downloaded!',
-    detail: `Version ${info.version} has been downloaded and will be installed when you quit the app.\n\nWould you like to restart now to apply the update?`,
-    buttons: ['Restart Now', 'Later'],
+    detail: `Version ${info.version} has been downloaded.\n\nClick "Install & Restart" to apply the update now.`,
+    buttons: ['Install & Restart', 'Later'],
     defaultId: 0,
     cancelId: 1,
   })
 
   if (result.response === 0) {
     console.log('User chose to restart and install update')
-    autoUpdater.quitAndInstall()
+    isUpdating = true
+    
+    // Force quit and install - delay slightly to ensure flag is set
+    setTimeout(() => {
+      autoUpdater.quitAndInstall(false, true)
+    }, 100)
   } else {
     console.log('User chose to install update later')
   }

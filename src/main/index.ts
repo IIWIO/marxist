@@ -11,7 +11,7 @@ import {
   restoreSession,
   getAppVersion,
 } from './services/sessionService'
-import { initAutoUpdater, checkForUpdates } from './autoUpdater'
+import { initAutoUpdater, checkForUpdates, isInstallingUpdate } from './autoUpdater'
 import type { SessionState } from '../types/session'
 
 interface WindowState {
@@ -966,6 +966,11 @@ function initialize() {
   })
 
   app.on('before-quit', (event) => {
+    // Skip quit prevention if we're installing an update
+    if (isInstallingUpdate()) {
+      return
+    }
+    
     if (!isQuitting && mainWindow) {
       event.preventDefault()
       isQuitting = true
