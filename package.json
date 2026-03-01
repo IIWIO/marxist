@@ -1,6 +1,6 @@
 {
   "name": "marxist",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "A beautiful macOS markdown editor with AI assistance",
   "main": "out/main/index.js",
   "author": "Marxist Team",
