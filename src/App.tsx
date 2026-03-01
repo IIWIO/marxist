@@ -41,7 +41,7 @@ function App() {
   const updateSetting = useSettingsStore((s) => s.updateSetting)
   const loadSettings = useSettingsStore((s) => s.loadSettings)
 
-  const { createNewFile, openFile, saveFile, saveFileAs } = useFileOperations()
+  const { createNewFile, openFile, saveFile, saveFileAs, openFilePath } = useFileOperations()
 
   const cycleTheme = useCallback(() => {
     const themes: Array<'system' | 'light' | 'dark'> = ['system', 'light', 'dark']
@@ -127,6 +127,13 @@ function App() {
     const unsubSettings = window.electron.onMenuEvent('menu:settings', openSettingsModal)
     const unsubToggleTheme = window.electron.onMenuEvent('menu:toggle-theme', cycleTheme)
 
+    // Listen for file open from OS (double-click in Finder)
+    const unsubOpenFilePath = window.electron.onAppEvent('app:open-file', (data) => {
+      if (typeof data === 'string') {
+        openFilePath(data)
+      }
+    })
+
     return () => {
       unsubNewFile()
       unsubOpenFile()
@@ -140,8 +147,9 @@ function App() {
       unsubFind()
       unsubSettings()
       unsubToggleTheme()
+      unsubOpenFilePath()
     }
-  }, [createNewFile, openFile, saveFile, saveFileAs, openSettingsModal, cycleTheme])
+  }, [createNewFile, openFile, saveFile, saveFileAs, openSettingsModal, cycleTheme, openFilePath])
 
   const isDark = theme === 'dark'
 

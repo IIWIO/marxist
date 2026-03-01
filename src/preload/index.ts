@@ -205,11 +205,12 @@ const electronAPI: ElectronAPI = {
     return () => {}
   },
 
-  onAppEvent: (channel: string, callback: () => void) => {
-    const validChannels = ['app:quit-requested']
+  onAppEvent: (channel: string, callback: (data?: unknown) => void) => {
+    const validChannels = ['app:quit-requested', 'app:open-file']
     if (validChannels.includes(channel)) {
-      ipcRenderer.on(channel, callback)
-      return () => ipcRenderer.removeListener(channel, callback)
+      const handler = (_event: Electron.IpcRendererEvent, data?: unknown) => callback(data)
+      ipcRenderer.on(channel, handler)
+      return () => ipcRenderer.removeListener(channel, handler)
     }
     return () => {}
   },

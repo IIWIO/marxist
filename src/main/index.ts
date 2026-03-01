@@ -900,6 +900,21 @@ Return ONLY the JSON array of replacements:`
 
 let mainWindow: BrowserWindow | null = null
 let isQuitting = false
+let fileToOpenOnReady: string | null = null
+
+// Handle file open from Finder (macOS) - can be called before app is ready
+app.on('open-file', (event, filePath) => {
+  event.preventDefault()
+  
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    // App is ready, send to renderer
+    mainWindow.webContents.send('app:open-file', filePath)
+    mainWindow.focus()
+  } else {
+    // App not ready yet, store for later
+    fileToOpenOnReady = filePath
+  }
+})
 
 function initialize() {
   const gotTheLock = app.requestSingleInstanceLock()
@@ -907,6 +922,22 @@ function initialize() {
     app.quit()
     return
   }
+
+  // Handle second instance (e.g., double-clicking another file while app is open)
+  app.on('second-instance', (_, commandLine) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+      
+      // On Windows/Linux, the file path is passed as a command line argument
+      const filePath = commandLine.find(arg => 
+        arg.endsWith('.md') || arg.endsWith('.markdown') || arg.endsWith('.txt')
+      )
+      if (filePath) {
+        mainWindow.webContents.send('app:open-file', filePath)
+      }
+    }
+  })
 
   app.whenReady().then(() => {
     app.setName('Marxist')
@@ -921,6 +952,17 @@ function initialize() {
     if (app.isPackaged) {
       initAutoUpdater(mainWindow)
     }
+
+    // Send file to open if one was passed before app was ready
+    mainWindow.webContents.on('did-finish-load', () => {
+      if (fileToOpenOnReady && mainWindow) {
+        // Small delay to ensure React is mounted
+        setTimeout(() => {
+          mainWindow?.webContents.send('app:open-file', fileToOpenOnReady)
+          fileToOpenOnReady = null
+        }, 500)
+      }
+    })
 
     // IPC handler for manual update check
     ipcMain.handle('app:check-for-updates', async () => {
