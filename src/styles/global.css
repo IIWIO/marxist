@@ -86,3 +86,27 @@ body {
 .dark .scrollbar-autohide.is-scrolling::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* Preview panel scrollbar - match editor scrollbar */
+.markdown-body::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.markdown-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.markdown-body::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.markdown-body.is-scrolling::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.dark .markdown-body.is-scrolling::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
