@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import appIcon from '@/../assets/app_icon/marksist_icon_round.png'
 
 export default function AboutSection() {
   const [appVersion, setAppVersion] = useState('1.0.0')
@@ -11,9 +12,11 @@ export default function AboutSection() {
 
   return (
     <div className="flex flex-col items-center text-center py-8">
-      <div className="w-24 h-24 mb-4 flex items-center justify-center bg-gradient-to-br from-accent to-accent-dark rounded-2xl shadow-lg">
-        <span className="text-4xl text-white font-bold">M</span>
-      </div>
+      <img
+        src={appIcon}
+        alt="Marxist"
+        className="w-24 h-24 mb-4 rounded-2xl shadow-lg"
+      />
 
       <h3 className="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark mb-1">
         Marxist

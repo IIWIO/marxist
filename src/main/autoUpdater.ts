@@ -3,7 +3,7 @@ import { app, dialog, BrowserWindow } from 'electron'
 
 autoUpdater.logger = console
 autoUpdater.autoDownload = false
-autoUpdater.autoInstallOnAppQuit = false
+autoUpdater.autoInstallOnAppQuit = true
 
 let mainWindow: BrowserWindow | null = null
 let updateDownloaded = false
@@ -105,10 +105,26 @@ async function showRestartDialog(info: UpdateInfo): Promise<void> {
     console.log('User chose to restart and install update')
     isUpdating = true
     
-    // Force quit and install - delay slightly to ensure flag is set
-    setTimeout(() => {
-      autoUpdater.quitAndInstall(false, true)
-    }, 100)
+    // Force quit and install
+    setImmediate(() => {
+      try {
+        // Remove all listeners that might prevent quit
+        app.removeAllListeners('window-all-closed')
+        app.removeAllListeners('before-quit')
+        
+        // For unsigned apps, we need to be more forceful
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.destroy()
+        }
+        
+        // Use quitAndInstall with isSilent=true (no installer UI) and isForceRunAfter=true
+        autoUpdater.quitAndInstall(true, true)
+      } catch (error) {
+        console.error('Error during quitAndInstall:', error)
+        // Fallback: just quit and let autoInstallOnAppQuit handle it
+        app.quit()
+      }
+    })
   } else {
     console.log('User chose to install update later')
   }
