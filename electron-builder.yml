@@ -12,6 +12,7 @@ publish:
 mac:
   category: public.app-category.productivity
   icon: assets/icon.icns
+  notarize: true
   target:
     - target: dmg
       arch:
