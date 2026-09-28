@@ -144,7 +144,7 @@ Marxist supports **GitHub Flavored Markdown 2.0** with additional extensions:
 
 ### Prerequisites
 
-- Node.js 20.19+ or 22.12+
+- Node.js 22.12+
 - npm 10+
 - macOS (for building the macOS app)
 
