@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useMarkdownParser } from '@/hooks/useMarkdownParser'
-import { useScrollSyncContext } from '@/contexts/ScrollSyncContext'
+import { useScrollSyncContext } from '@/contexts/scrollSync'
 import { useScrollbarAutohide } from '@/hooks/useScrollbarAutohide'
 
 import '@/styles/github-markdown.css'

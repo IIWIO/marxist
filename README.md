@@ -24,7 +24,7 @@ Marxist is a focused, elegant Markdown editor for macOS. It's not trying to be N
 ## Features
 
 - **Three Views** — Switch seamlessly between Markdown-only, Split (editor + preview), and Render-only views
-- **AI-Powered Editing** — An AI assistant that doesn't just suggest — it can directly edit your document with diff highlighting
+- **AI-Powered Editing** — Validated, document-aware edits with a reviewable diff and one-click revert
 - **Beautiful Syntax Highlighting** — Color-coded Markdown tokens for maximum readability
 - **GitHub Flavored Markdown** — Full GFM support including tables, task lists, strikethrough, and code block highlighting
 - **Math Support** — LaTeX math rendering via KaTeX
@@ -103,7 +103,7 @@ npm run build:mac
 Marxist integrates with [OpenRouter](https://openrouter.ai) to provide AI-powered writing assistance. The AI can:
 
 - **Chat** — Ask questions about your document, get suggestions, brainstorm ideas
-- **Direct Editing** — Ask the AI to make changes and it will modify your document directly with diff highlighting
+- **Direct Editing** — Ask the AI to make changes; only a fully validated edit is applied, then shown as a reviewable diff
 - **Accept or Revert** — Review AI changes with added/removed line highlighting before accepting
 
 ### Setup
@@ -113,7 +113,7 @@ Marxist integrates with [OpenRouter](https://openrouter.ai) to provide AI-powere
 3. Paste your API key in the AI Configuration section
 4. Choose your preferred model from the dropdown
 
-Your API key is stored securely and all API calls are made from the main process — never exposed to the renderer.
+Your API key is encrypted with the operating system's secure storage. API calls are made from the main process, and the saved key is never returned to the renderer.
 
 ## Markdown Support
 
@@ -132,7 +132,7 @@ Marxist supports **GitHub Flavored Markdown 2.0** with additional extensions:
 | Layer | Technology |
 |-------|------------|
 | Framework | Electron |
-| Frontend | React 18 |
+| Frontend | React 19 |
 | State Management | Zustand |
 | Editor | CodeMirror 6 |
 | Markdown | unified / remark / rehype |
@@ -144,8 +144,8 @@ Marxist supports **GitHub Flavored Markdown 2.0** with additional extensions:
 
 ### Prerequisites
 
-- Node.js 18+
-- npm 9+
+- Node.js 22.12+
+- npm 10+
 - macOS (for building the macOS app)
 
 ### Scripts
@@ -162,6 +162,15 @@ npm run build:mac
 
 # Run tests
 npm test
+
+# Run typecheck, lint, and coverage gates
+npm run check
+
+# Run every pre-package gate and production build
+npm run verify
+
+# Run the isolated Electron smoke suite (macOS)
+npm run test:e2e
 
 # Lint code
 npm run lint
@@ -190,7 +199,7 @@ marxist/
 
 1. **Simplicity first** — Three views, one purpose: write Markdown well
 2. **Beautiful defaults** — Looks great out of the box
-3. **AI as an editor, not just a chatbot** — The AI can read and rewrite the document in real-time
+3. **AI as an editor, not just a chatbot** — The AI can propose validated, reversible changes to the document
 4. **No lock-in** — Plain `.md` files, no proprietary format
 5. **Manual save** — The user is in control
 

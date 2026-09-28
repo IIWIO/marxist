@@ -1,12 +1,6 @@
-import { createContext, useContext, ReactNode, useMemo, useEffect } from 'react'
+import { ReactNode, useMemo, useEffect } from 'react'
 import { useScrollSync } from '@/hooks/useScrollSync'
-
-interface ScrollSyncContextValue {
-  registerEditorScroller: (element: HTMLElement | null) => void
-  registerPreviewScroller: (element: HTMLElement | null) => void
-}
-
-const ScrollSyncContext = createContext<ScrollSyncContextValue | null>(null)
+import { ScrollSyncContext } from './scrollSync'
 
 export function ScrollSyncProvider({ children }: { children: ReactNode }) {
   const { registerEditorScroller, registerPreviewScroller, cleanup } = useScrollSync()
@@ -25,8 +19,4 @@ export function ScrollSyncProvider({ children }: { children: ReactNode }) {
       {children}
     </ScrollSyncContext.Provider>
   )
-}
-
-export function useScrollSyncContext() {
-  return useContext(ScrollSyncContext)
 }

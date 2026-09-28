@@ -76,9 +76,10 @@ describe('editorStore', () => {
       expect(useEditorStore.getState().tabs.get(tabId)?.isDirty).toBe(true)
     })
 
-    it('updates word and letter counts for active tab', () => {
+    it('refreshes word and letter counts in one deferred operation', () => {
       const tabId = useEditorStore.getState().createTab(null, '')
       useEditorStore.getState().updateTabContent(tabId, 'one two three')
+      useEditorStore.getState().refreshCounts('one two three')
 
       expect(useEditorStore.getState().wordCount).toBe(3)
       expect(useEditorStore.getState().letterCount).toBe(11)

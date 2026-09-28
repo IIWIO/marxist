@@ -1,4 +1,5 @@
 import type { EditorState } from '@codemirror/state'
+import type { DiffResult } from '@/utils/diff'
 
 export interface TabState {
   tabId: string
@@ -13,6 +14,7 @@ export interface TabState {
   preEditSnapshot: string | null
   isAIEditing: boolean
   showDiff: boolean
+  diffResult: DiffResult | null
 }
 
 export interface RecentFile {

@@ -16,6 +16,14 @@ export interface SessionState {
   splitRatio: number
   sidebarOpen: boolean
   aiPanelOpen: boolean
+  tabs?: Array<{
+    tabId: string
+    filePath: string | null
+    fileName: string
+    isDirty: boolean
+    cursorPosition: number
+    scrollPosition: number
+  }>
   savedAt: string
   appVersion: string
 }

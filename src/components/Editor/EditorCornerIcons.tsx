@@ -49,7 +49,7 @@ export default function EditorCornerIcons({
             <button
               onClick={handleCopy}
               aria-label="Copy raw Markdown"
-              className="flex items-center justify-center w-8 h-8 transition-colors duration-150"
+              className={`flex items-center justify-center w-8 h-8 transition-colors duration-150 ${copied ? 'text-green-600' : ''}`}
             >
               <Icon name={copied ? 'check' : 'content_copy'} size={20} />
             </button>

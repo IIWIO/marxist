@@ -5,6 +5,7 @@ import { useEditorStore } from '@/stores/editorStore'
 export default function DiffBanner() {
   const activeTab = useEditorStore((s) => s.getActiveTab())
   const { acceptEdit, revertEdit, cancelRequest } = useAIAgent()
+  const diff = activeTab?.diffResult
 
   if (!activeTab?.isAIEditing && !activeTab?.showDiff) return null
 
@@ -52,8 +53,19 @@ export default function DiffBanner() {
     >
       <div className="flex items-center gap-4 text-sm">
         <span className="font-medium text-amber-800 dark:text-amber-200">
-            Karl made changes to your document
+          Karl made changes to your document
         </span>
+        {diff && (
+          <span
+            className="text-amber-700 dark:text-amber-300"
+            aria-label={`${diff.addedCount} lines added, ${diff.removedCount} lines removed`}
+          >
+            <span className="text-green-700 dark:text-green-400">+{diff.addedCount}</span>
+            {' / '}
+            <span className="text-red-700 dark:text-red-400">-{diff.removedCount}</span>
+            {' lines'}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2">

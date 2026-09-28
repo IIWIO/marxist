@@ -134,9 +134,9 @@ When window width is narrow, icons collapse into an overflow menu (…) button. 
 
 This is the core AI feature. The AI doesn't just suggest — it edits.
 
-- When the user asks the AI to make changes (e.g., "fix my table", "remove all instances of Inc."), the AI streams the modified document in real-time
-- **During streaming:** the editor is **locked read-only**
-- **After streaming completes:** a **banner across the top of the editor panel** shows **Accept** and **Revert** buttons
+- When the user asks the AI to make changes (e.g., "fix my table", "remove all instances of Inc."), the AI returns validated, uniquely anchored replacements
+- **During generation:** the editor is **locked read-only** and its original content is preserved
+- **After validation succeeds:** the complete edit is applied atomically and a **banner across the top of the editor panel** shows **Accept** and **Revert** buttons
 - **Changed lines are highlighted:** green for added lines, red for removed lines (diff view)
 - The user must click Accept or Revert before they can resume editing
 - **Revert** restores the pre-edit snapshot completely

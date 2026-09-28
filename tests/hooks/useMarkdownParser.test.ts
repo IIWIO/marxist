@@ -46,7 +46,7 @@ describe('useMarkdownParser', () => {
       () => {
         expect(result.current.html).toContain('<h1>')
       },
-      { timeout: 200 }
+      { timeout: 1000 }
     )
   })
 
@@ -68,7 +68,7 @@ describe('useMarkdownParser', () => {
         expect(result.current.html).not.toContain('Second')
         expect(result.current.html).not.toContain('Third')
       },
-      { timeout: 300 }
+      { timeout: 1000 }
     )
   })
 

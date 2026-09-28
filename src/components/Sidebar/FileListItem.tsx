@@ -2,6 +2,7 @@ import { memo } from 'react'
 import Icon from '@/components/common/Icon'
 import { useEditorStore } from '@/stores/editorStore'
 import type { TabState } from '@/types/files'
+import { useFileOperations } from '@/hooks/useFileOperations'
 
 interface FileListItemProps {
   tab: TabState
@@ -11,9 +12,16 @@ interface FileListItemProps {
 
 function FileListItem({ tab, isActive, onClick }: FileListItemProps) {
   const closeTab = useEditorStore((s) => s.closeTab)
+  const { saveTab } = useFileOperations()
 
-  const handleClose = (e: React.MouseEvent) => {
+  const handleClose = async (e: React.MouseEvent) => {
     e.stopPropagation()
+    if (tab.isDirty) {
+      const action = await window.electron.file.confirmClose(tab.fileName)
+      if (action === 'cancel') return
+      if (action === 'save' && !(await saveTab(tab.tabId))) return
+      if (action === 'discard') await window.electron.drafts.clear(tab.tabId)
+    }
     closeTab(tab.tabId)
   }
 

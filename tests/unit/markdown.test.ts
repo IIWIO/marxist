@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { parseMarkdownSync, parseMarkdown, estimateWordCount, isLargeDocument } from '@/utils/markdown'
+import { parseMarkdownSync, parseMarkdown } from '@/utils/markdownProcessor'
+import { estimateWordCount, isLargeDocument } from '@/utils/markdown'
 
 describe('Markdown Parser', () => {
   describe('parseMarkdownSync', () => {

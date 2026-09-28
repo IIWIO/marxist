@@ -203,7 +203,7 @@ export const outdentLine: StateCommand = ({ state, dispatch }) => {
 
     for (let lineNum = fromLine.number; lineNum <= toLine.number; lineNum++) {
       const line = state.doc.line(lineNum)
-      const match = line.text.match(/^(\t|  )/)
+      const match = line.text.match(/^(\t| {2})/)
 
       if (match) {
         linesToOutdent.push({

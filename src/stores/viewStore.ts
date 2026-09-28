@@ -17,13 +17,34 @@ interface ViewState {
   resetSplitRatio: () => void
   toggleSidebar: () => void
   toggleAiPanel: () => void
+  setSidebarOpen: (open: boolean) => void
+  setAiPanelOpen: (open: boolean) => void
   setWindowWidth: (width: number) => void
 }
 
 const MIN_SPLIT_RATIO = 0.2
 const MAX_SPLIT_RATIO = 0.8
 const DEFAULT_SPLIT_RATIO = 0.5
-const NARROW_WINDOW_THRESHOLD = 600
+const SIDEBAR_WIDTH = 240
+const AI_PANEL_WIDTH = 360
+const MIN_SPLIT_CONTENT_WIDTH = 560
+
+function isNarrowLayout(width: number, sidebarOpen: boolean, aiPanelOpen: boolean): boolean {
+  return width - (sidebarOpen ? SIDEBAR_WIDTH : 0) - (aiPanelOpen ? AI_PANEL_WIDTH : 0) < MIN_SPLIT_CONTENT_WIDTH
+}
+
+function applyResponsiveView(
+  state: Pick<ViewState, 'activeView' | 'previousView' | 'isNarrowWindow'>,
+  isNarrowWindow: boolean
+): Partial<ViewState> {
+  if (isNarrowWindow && !state.isNarrowWindow && state.activeView === 'split') {
+    return { activeView: 'markdown', previousView: 'split' }
+  }
+  if (!isNarrowWindow && state.isNarrowWindow && state.previousView === 'split') {
+    return { activeView: 'split', previousView: null }
+  }
+  return {}
+}
 
 export const useViewStore = create<ViewState>()(
   subscribeWithSelector((set, get) => ({
@@ -55,26 +76,36 @@ export const useViewStore = create<ViewState>()(
     },
 
     toggleSidebar: () => {
-      set((state) => ({ sidebarOpen: !state.sidebarOpen }))
+      const state = get()
+      get().setSidebarOpen(!state.sidebarOpen)
     },
 
     toggleAiPanel: () => {
-      set((state) => ({ aiPanelOpen: !state.aiPanelOpen }))
+      const state = get()
+      get().setAiPanelOpen(!state.aiPanelOpen)
+    },
+
+    setSidebarOpen: (sidebarOpen) => {
+      const state = get()
+      const isNarrowWindow = isNarrowLayout(state.windowWidth, sidebarOpen, state.aiPanelOpen)
+      set({ sidebarOpen, isNarrowWindow, ...applyResponsiveView(state, isNarrowWindow) })
+    },
+
+    setAiPanelOpen: (aiPanelOpen) => {
+      const state = get()
+      const isNarrowWindow = isNarrowLayout(state.windowWidth, state.sidebarOpen, aiPanelOpen)
+      set({ aiPanelOpen, isNarrowWindow, ...applyResponsiveView(state, isNarrowWindow) })
     },
 
     setWindowWidth: (width) => {
-      const isNarrow = width < NARROW_WINDOW_THRESHOLD
-      const { activeView, previousView, isNarrowWindow } = get()
+      const { activeView, previousView, isNarrowWindow, sidebarOpen, aiPanelOpen } = get()
+      const isNarrow = isNarrowLayout(width, sidebarOpen, aiPanelOpen)
 
-      set({ windowWidth: width, isNarrowWindow: isNarrow })
-
-      if (isNarrow && !isNarrowWindow && activeView === 'split') {
-        set({ activeView: 'markdown', previousView: 'split' })
-      }
-
-      if (!isNarrow && isNarrowWindow && previousView === 'split') {
-        set({ activeView: 'split', previousView: null })
-      }
+      set({
+        windowWidth: width,
+        isNarrowWindow: isNarrow,
+        ...applyResponsiveView({ activeView, previousView, isNarrowWindow }, isNarrow),
+      })
     },
   }))
 )

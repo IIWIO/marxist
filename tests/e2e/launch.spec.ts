@@ -1,51 +1,27 @@
-import { test, expect, _electron as electron } from '@playwright/test'
-import { resolve } from 'path'
+import { test, expect } from './fixtures'
 
 test.describe('App Launch', () => {
-  test('should launch and show window', async () => {
-    const electronApp = await electron.launch({
-      args: [resolve(__dirname, '../../out/main/index.js')],
-    })
-
-    const page = await electronApp.firstWindow()
-    await page.waitForLoadState('domcontentloaded')
-
-    const topBar = page.locator('header')
+  test('should launch and show window', async ({ appWindow }) => {
+    const topBar = appWindow.locator('header')
     await expect(topBar).toBeVisible()
 
-    const viewportSize = page.viewportSize()
-    expect(viewportSize?.width).toBeGreaterThanOrEqual(800)
-    expect(viewportSize?.height).toBeGreaterThanOrEqual(500)
-
-    await electronApp.close()
+    const viewportSize = await appWindow.evaluate(() => ({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    }))
+    expect(viewportSize.width).toBeGreaterThanOrEqual(800)
+    expect(viewportSize.height).toBeGreaterThanOrEqual(500)
   })
 
-  test('should start within 2 seconds (NF-01)', async () => {
+  test('becomes interactive promptly (NF-01)', async ({ appWindow }) => {
     const startTime = Date.now()
-
-    const electronApp = await electron.launch({
-      args: [resolve(__dirname, '../../out/main/index.js')],
-    })
-
-    const page = await electronApp.firstWindow()
-    await page.waitForSelector('header')
-
-    const loadTime = Date.now() - startTime
-    expect(loadTime).toBeLessThan(2000)
-
-    await electronApp.close()
+    await appWindow.waitForSelector('header')
+    expect(Date.now() - startTime).toBeLessThan(2000)
   })
 
-  test('should have correct app title', async () => {
-    const electronApp = await electron.launch({
-      args: [resolve(__dirname, '../../out/main/index.js')],
-    })
-
-    const page = await electronApp.firstWindow()
-    const title = await page.title()
+  test('should have correct app title', async ({ appWindow }) => {
+    const title = await appWindow.title()
 
     expect(title).toBe('Marxist')
-
-    await electronApp.close()
   })
 })

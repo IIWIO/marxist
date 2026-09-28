@@ -1,121 +1,96 @@
 import { useCallback } from 'react'
 import { useEditorStore } from '@/stores/editorStore'
 import { useFileStore } from '@/stores/fileStore'
-import type { OpenFileResult, SaveFileResult } from '@/types/files'
+
+async function showOperationError(operation: string, error: string): Promise<void> {
+  await window.electron.file.showError(
+    `${operation} Failed`,
+    `Marxist could not ${operation.toLowerCase()} the file.`,
+    error
+  )
+}
 
 export function useFileOperations() {
   const createTab = useEditorStore((state) => state.createTab)
   const setActiveTab = useEditorStore((state) => state.setActiveTab)
-  const getActiveTab = useEditorStore((state) => state.getActiveTab)
   const getTabByPath = useEditorStore((state) => state.getTabByPath)
   const markTabSaved = useEditorStore((state) => state.markTabSaved)
   const addRecentFile = useFileStore((state) => state.addRecentFile)
 
-  const createNewFile = useCallback(() => {
-    const tabId = createTab(null, '')
+  const createNewFile = useCallback(() => createTab(null, ''), [createTab])
+
+  const openFilePath = useCallback(async (path: string): Promise<string | null> => {
+    const existing = getTabByPath(path)
+    if (existing) {
+      setActiveTab(existing.tabId)
+      return existing.tabId
+    }
+    const result = await window.electron.file.drop(path)
+    if (!result.ok) {
+      await showOperationError('Open', result.error)
+      return null
+    }
+    const tabId = createTab(result.value.path, result.value.content)
+    addRecentFile(result.value.path, result.value.name)
     return tabId
-  }, [createTab])
+  }, [addRecentFile, createTab, getTabByPath, setActiveTab])
 
   const openFile = useCallback(async (): Promise<string | null> => {
-    try {
-      const result: OpenFileResult = await window.electron.file.open()
-
-      if (!result.path) return null
-
-      const existingTab = getTabByPath(result.path)
-      if (existingTab) {
-        setActiveTab(existingTab.tabId)
-        return existingTab.tabId
-      }
-
-      const tabId = createTab(result.path, result.content)
-
-      addRecentFile(result.path, result.name)
-
-      return tabId
-    } catch (error) {
-      console.error('Failed to open file:', error)
+    const result = await window.electron.file.open()
+    if (!result.ok) {
+      await showOperationError('Open', result.error)
       return null
     }
-  }, [createTab, setActiveTab, getTabByPath, addRecentFile])
-
-  const openFilePath = useCallback(async (filePath: string): Promise<string | null> => {
-    try {
-      const existingTab = getTabByPath(filePath)
-      if (existingTab) {
-        setActiveTab(existingTab.tabId)
-        return existingTab.tabId
-      }
-
-      const result: OpenFileResult = await window.electron.file.drop(filePath)
-
-      if (!result.path) return null
-
-      const tabId = createTab(result.path, result.content)
-      addRecentFile(result.path, result.name)
-
-      return tabId
-    } catch (error) {
-      console.error('Failed to open file path:', error)
-      return null
+    if (!result.value.path) return null
+    const existing = getTabByPath(result.value.path)
+    if (existing) {
+      setActiveTab(existing.tabId)
+      return existing.tabId
     }
-  }, [createTab, setActiveTab, getTabByPath, addRecentFile])
+    const tabId = createTab(result.value.path, result.value.content)
+    addRecentFile(result.value.path, result.value.name)
+    return tabId
+  }, [addRecentFile, createTab, getTabByPath, setActiveTab])
 
-  const saveFile = useCallback(async (): Promise<boolean> => {
-    const activeTab = getActiveTab()
-    if (!activeTab) return false
-
-    try {
-      if (activeTab.filePath) {
-        const result: SaveFileResult = await window.electron.file.save(
-          activeTab.filePath,
-          activeTab.content
-        )
-
-        if (result.success) {
-          markTabSaved(activeTab.tabId)
-          await window.electron.drafts.clear(activeTab.tabId)
-          return true
-        }
-
-        console.error('Save failed:', result.error)
-        return false
-      } else {
-        return await saveFileAs()
-      }
-    } catch (error) {
-      console.error('Failed to save file:', error)
+  const saveTabAs = useCallback(async (tabId: string): Promise<boolean> => {
+    const tab = useEditorStore.getState().tabs.get(tabId)
+    if (!tab) return false
+    const result = await window.electron.file.saveAs(tab.content)
+    if (!result.ok) {
+      await showOperationError('Save', result.error)
       return false
     }
-  }, [getActiveTab, markTabSaved])
+    if (!result.value.path) return false
+    const fileName = result.value.name || result.value.path.split('/').pop() || 'Untitled'
+    markTabSaved(tabId, result.value.path, fileName)
+    addRecentFile(result.value.path, fileName)
+    await window.electron.drafts.clear(tabId)
+    return true
+  }, [addRecentFile, markTabSaved])
 
-  const saveFileAs = useCallback(async (): Promise<boolean> => {
-    const activeTab = getActiveTab()
-    if (!activeTab) return false
-
-    try {
-      const result = await window.electron.file.saveAs(activeTab.content)
-
-      if (result.path) {
-        const fileName = result.name || result.path.split('/').pop() || 'Untitled'
-        markTabSaved(activeTab.tabId, result.path, fileName)
-        addRecentFile(result.path, fileName)
-        await window.electron.drafts.clear(activeTab.tabId)
-        return true
-      }
-
-      return false
-    } catch (error) {
-      console.error('Failed to save file as:', error)
+  const saveTab = useCallback(async (tabId: string): Promise<boolean> => {
+    const tab = useEditorStore.getState().tabs.get(tabId)
+    if (!tab) return false
+    if (!tab.filePath) return saveTabAs(tabId)
+    const result = await window.electron.file.save(tab.filePath, tab.content)
+    if (!result.ok) {
+      await showOperationError('Save', result.error)
       return false
     }
-  }, [getActiveTab, markTabSaved, addRecentFile])
+    markTabSaved(tabId)
+    await window.electron.drafts.clear(tabId)
+    return true
+  }, [markTabSaved, saveTabAs])
 
-  return {
-    createNewFile,
-    openFile,
-    openFilePath,
-    saveFile,
-    saveFileAs,
-  }
+  const saveFile = useCallback(async () => {
+    const tabId = useEditorStore.getState().activeTabId
+    return tabId ? saveTab(tabId) : false
+  }, [saveTab])
+
+  const saveFileAs = useCallback(async () => {
+    const tabId = useEditorStore.getState().activeTabId
+    return tabId ? saveTabAs(tabId) : false
+  }, [saveTabAs])
+
+  return { createNewFile, openFile, openFilePath, saveFile, saveFileAs, saveTab }
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import MarkdownEditor from '@/components/Editor/MarkdownEditor'
+import { computeDiff } from '@/utils/diff'
 
 describe('MarkdownEditor', () => {
   it('renders editor container', () => {
@@ -93,6 +94,23 @@ describe('MarkdownEditor', () => {
     await waitFor(() => {
       const editor = screen.getByTestId('markdown-editor')
       expect(editor.querySelector('.cm-lineNumbers')).toBeInTheDocument()
+    })
+  })
+
+  it('renders added and removed AI diff lines', async () => {
+    render(
+      <MarkdownEditor
+        content={'kept\nadded'}
+        onChange={vi.fn()}
+        isDark={false}
+        diffResult={computeDiff('kept\nremoved', 'kept\nadded')}
+      />
+    )
+
+    await waitFor(() => {
+      const editor = screen.getByTestId('markdown-editor')
+      expect(editor.querySelector('.cm-ai-added-line')).toBeInTheDocument()
+      expect(editor.querySelector('.cm-ai-removed-line')).toHaveTextContent('removed')
     })
   })
 })

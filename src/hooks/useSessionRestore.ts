@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useEditorStore } from '@/stores/editorStore'
 import { useViewStore } from '@/stores/viewStore'
-import type { RestoreResult } from '@/preload/index'
 
 interface SessionRestoreState {
   isRestoring: boolean
@@ -23,19 +22,20 @@ export function useSessionRestore(): SessionRestoreState {
 
   const setActiveView = useViewStore((s) => s.setActiveView)
   const setSplitRatio = useViewStore((s) => s.setSplitRatio)
+  const setSidebarOpen = useViewStore((s) => s.setSidebarOpen)
+  const setAiPanelOpen = useViewStore((s) => s.setAiPanelOpen)
 
   useEffect(() => {
     async function restore() {
       try {
-        const result: RestoreResult = await window.electron.drafts.restore()
-
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to restore session')
-        }
+        const response = await window.electron.drafts.restore()
+        if (!response.ok) throw new Error(response.error)
+        const result = response.value
 
         if (result.tabs.length === 0) {
-          const welcomeResult = await window.electron.app.getWelcomeFile()
-          if (welcomeResult.isFirstRun && welcomeResult.content) {
+          const welcomeResponse = await window.electron.app.getWelcomeFile()
+          const welcomeResult = welcomeResponse.ok ? welcomeResponse.value : null
+          if (welcomeResult?.isFirstRun && welcomeResult.content) {
             createTab(null, welcomeResult.content, welcomeResult.name || 'Welcome.md')
           } else {
             createTab(null, '')
@@ -75,6 +75,8 @@ export function useSessionRestore(): SessionRestoreState {
           if (result.session.splitRatio) {
             setSplitRatio(result.session.splitRatio)
           }
+          setSidebarOpen(result.session.sidebarOpen)
+          setAiPanelOpen(result.session.aiPanelOpen)
         }
 
         setState({ isRestoring: false, isRestored: true, error: null })
@@ -93,7 +95,16 @@ export function useSessionRestore(): SessionRestoreState {
     }
 
     restore()
-  }, [createTab, restoreTab, setActiveTab, setUntitledCounter, setActiveView, setSplitRatio])
+  }, [
+    createTab,
+    restoreTab,
+    setActiveTab,
+    setUntitledCounter,
+    setActiveView,
+    setSplitRatio,
+    setSidebarOpen,
+    setAiPanelOpen,
+  ])
 
   return state
 }

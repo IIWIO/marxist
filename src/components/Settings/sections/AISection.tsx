@@ -5,12 +5,15 @@ import ModelSelector from '../components/ModelSelector'
 import SystemPromptEditor from '../components/SystemPromptEditor'
 
 export default function AISection() {
-  const apiKey = useSettingsStore((s) => s.openRouterApiKey)
+  const apiKey = useSettingsStore((s) => s.apiKeyInput)
+  const hasApiKey = useSettingsStore((s) => s.hasApiKey)
   const selectedModel = useSettingsStore((s) => s.selectedModel)
   const systemPrompt = useSettingsStore((s) => s.systemPrompt)
   const isApiKeyVerified = useSettingsStore((s) => s.isApiKeyVerified)
   const availableModels = useSettingsStore((s) => s.availableModels)
   const updateSetting = useSettingsStore((s) => s.updateSetting)
+  const setApiKeyInput = useSettingsStore((s) => s.setApiKeyInput)
+  const storeApiKey = useSettingsStore((s) => s.storeApiKey)
   const setApiKeyVerified = useSettingsStore((s) => s.setApiKeyVerified)
 
   const [isVerifying, setIsVerifying] = useState(false)
@@ -28,36 +31,42 @@ export default function AISection() {
     try {
       const verifyResult = await window.electron.ai.verifyKey(apiKey)
 
-      if (!verifyResult.valid) {
-        setVerifyError(verifyResult.error || 'Invalid API key')
+      if (!verifyResult.ok) {
+        setVerifyError(verifyResult.error)
         setApiKeyVerified(false, [])
+        return
+      }
+
+      const storeResult = await storeApiKey()
+      if (!storeResult.ok) {
+        setVerifyError(storeResult.error)
         return
       }
 
       const modelsResult = await window.electron.ai.listModels()
 
-      if (modelsResult.error) {
+      if (!modelsResult.ok) {
         setVerifyError(modelsResult.error)
         setApiKeyVerified(false, [])
         return
       }
 
-      setApiKeyVerified(true, modelsResult.models || [])
+      setApiKeyVerified(true, modelsResult.value)
     } catch (error) {
       setVerifyError((error as Error).message)
       setApiKeyVerified(false, [])
     } finally {
       setIsVerifying(false)
     }
-  }, [apiKey, setApiKeyVerified])
+  }, [apiKey, setApiKeyVerified, storeApiKey])
 
   const handleApiKeyChange = useCallback(
     (value: string) => {
-      updateSetting('openRouterApiKey', value)
+      setApiKeyInput(value)
       setApiKeyVerified(false, [])
       setVerifyError(null)
     },
-    [updateSetting, setApiKeyVerified]
+    [setApiKeyInput, setApiKeyVerified]
   )
 
   return (
@@ -73,6 +82,7 @@ export default function AISection() {
           isVerifying={isVerifying}
           isVerified={isApiKeyVerified}
           error={verifyError}
+          hasStoredKey={hasApiKey}
         />
         <p className="mt-1.5 text-xs text-text-secondary-light dark:text-text-secondary-dark">
           Get your API key from{' '}

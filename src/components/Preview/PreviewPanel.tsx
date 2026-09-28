@@ -14,7 +14,7 @@ export default function PreviewPanel({ content, isDark, fontSize = 16, fullWidth
   const showAIIcon = activeView === 'render' || activeView === 'split'
 
   const handleLinkClick = (url: string) => {
-    window.electron?.file?.openExternal?.(url) || window.open(url, '_blank')
+    void window.electron.file.openExternal(url)
   }
 
   return (

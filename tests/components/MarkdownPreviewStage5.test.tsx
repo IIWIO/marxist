@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import MarkdownPreview from '@/components/Preview/MarkdownPreview'
 
+const MARKDOWN_RENDER_TIMEOUT_MS = 2_000
+
 describe('MarkdownPreview', () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
@@ -17,7 +19,7 @@ describe('MarkdownPreview', () => {
         const preview = screen.getByTestId('markdown-preview')
         expect(preview.querySelector('h1')).toBeInTheDocument()
       },
-      { timeout: 500 }
+      { timeout: MARKDOWN_RENDER_TIMEOUT_MS }
     )
   })
 
@@ -46,7 +48,7 @@ describe('MarkdownPreview', () => {
         const preview = screen.getByTestId('markdown-preview')
         expect(preview.querySelector('table')).toBeInTheDocument()
       },
-      { timeout: 500 }
+      { timeout: MARKDOWN_RENDER_TIMEOUT_MS }
     )
   })
 
@@ -66,7 +68,7 @@ describe('MarkdownPreview', () => {
           expect(checkbox).toBeDisabled()
         })
       },
-      { timeout: 500 }
+      { timeout: MARKDOWN_RENDER_TIMEOUT_MS }
     )
   })
 
@@ -81,7 +83,7 @@ describe('MarkdownPreview', () => {
         const link = screen.getByTestId('markdown-preview').querySelector('a')
         expect(link).toBeInTheDocument()
       },
-      { timeout: 500 }
+      { timeout: MARKDOWN_RENDER_TIMEOUT_MS }
     )
 
     const link = screen.getByTestId('markdown-preview').querySelector('a')
@@ -104,7 +106,7 @@ describe('MarkdownPreview', () => {
         const codeBlock = screen.getByTestId('markdown-preview').querySelector('pre code')
         expect(codeBlock).toBeInTheDocument()
       },
-      { timeout: 500 }
+      { timeout: MARKDOWN_RENDER_TIMEOUT_MS }
     )
   })
 

@@ -25,6 +25,7 @@ export default function HeadingButton({ level, onClick, disabled = false }: Head
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         <Icon name={`format_h${level}`} size={20} />
+        <span className="sr-only">H{level}</span>
       </button>
     </Tooltip>
   )

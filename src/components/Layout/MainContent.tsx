@@ -1,5 +1,5 @@
-import { useRef, useEffect } from 'react'
-import { useViewStore, selectActiveView, selectAiPanelOpen, selectSidebarOpen } from '@/stores/viewStore'
+import { useCallback } from 'react'
+import { useViewStore, selectActiveView, selectAiPanelOpen, selectSidebarOpen, selectIsNarrowWindow } from '@/stores/viewStore'
 import { useEditorStore, selectActiveTab } from '@/stores/editorStore'
 import { EditorPanel } from '@/components/Editor'
 import PreviewPanel from '@/components/Preview/PreviewPanel'
@@ -13,6 +13,7 @@ interface MainContentProps {
   previewFontSize?: number
   lineNumbers?: boolean
   wordWrap?: boolean
+  spellCheck?: boolean
   editorRef?: React.MutableRefObject<EditorRef | null>
 }
 
@@ -22,42 +23,25 @@ export default function MainContent({
   previewFontSize = 16,
   lineNumbers = false,
   wordWrap = true,
+  spellCheck = true,
   editorRef,
 }: MainContentProps) {
   const activeView = useViewStore(selectActiveView)
   const aiPanelOpen = useViewStore(selectAiPanelOpen)
   const sidebarOpen = useViewStore(selectSidebarOpen)
+  const isNarrowWindow = useViewStore(selectIsNarrowWindow)
   const activeTab = useEditorStore(selectActiveTab)
   const updateTabContent = useEditorStore((state) => state.updateTabContent)
-  const updateTabEditorState = useEditorStore((state) => state.updateTabEditorState)
 
   const content = activeTab?.content || ''
 
-  const handleContentChange = (newContent: string) => {
-    if (activeTab) {
-      updateTabContent(activeTab.tabId, newContent)
-    }
-  }
+  const activeTabId = activeTab?.tabId
+  const handleContentChange = useCallback((newContent: string) => {
+    if (activeTabId) updateTabContent(activeTabId, newContent)
+  }, [activeTabId, updateTabContent])
 
-  const previousTabIdRef = useRef<string | null>(null)
-
-  useEffect(() => {
-    const currentTabId = activeTab?.tabId || null
-
-    if (previousTabIdRef.current && previousTabIdRef.current !== currentTabId && editorRef?.current) {
-      const snapshot = editorRef.current.getSnapshot()
-      updateTabEditorState(
-        previousTabIdRef.current,
-        null,
-        snapshot.scrollTop,
-        snapshot.selection.anchor
-      )
-    }
-
-    previousTabIdRef.current = currentTabId
-  }, [activeTab?.tabId, editorRef, updateTabEditorState])
-
-  const sidebarOffset = sidebarOpen && activeView !== 'render' ? 240 : 0
+  const sidebarOffset = !isNarrowWindow && sidebarOpen && activeView !== 'render' ? 240 : 0
+  const aiOffset = !isNarrowWindow && aiPanelOpen ? 360 : 0
 
   const renderContent = () => {
     if (!activeTab) {
@@ -78,6 +62,7 @@ export default function MainContent({
             fontSize={fontSize}
             lineNumbers={lineNumbers}
             wordWrap={wordWrap}
+            spellCheck={spellCheck}
             editorRef={editorRef}
           />
         )
@@ -93,6 +78,7 @@ export default function MainContent({
                 fontSize={fontSize}
                 lineNumbers={lineNumbers}
                 wordWrap={wordWrap}
+                spellCheck={spellCheck}
                 editorRef={editorRef}
                 showAIIcon={false}
               />
@@ -130,7 +116,7 @@ export default function MainContent({
         className="h-full overflow-hidden transition-[margin-left,margin-right] duration-200 ease-out"
         style={{
           marginLeft: `${sidebarOffset}px`,
-          marginRight: aiPanelOpen ? '360px' : 0,
+          marginRight: `${aiOffset}px`,
         }}
       >
         {renderContent()}

@@ -1,45 +1,33 @@
-import { useEffect, useRef } from 'react'
-import { useEditorStore } from '@/stores/editorStore'
+import { useEffect } from 'react'
+import { buildRecoveryPayload } from '@/utils/recovery'
 
-const AUTO_SAVE_INTERVAL = 30000
+const AUTO_SAVE_INTERVAL = 30_000
 
 export function useAutoSave(enabled: boolean): void {
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
   useEffect(() => {
     if (!enabled) return
-
-    const saveDrafts = async () => {
-      const { tabs } = useEditorStore.getState()
-
-      if (tabs.size === 0) return
-
-      const drafts = Array.from(tabs.values()).map((tab) => ({
-        tabId: tab.tabId,
-        content: tab.content,
-        filePath: tab.filePath,
-        fileName: tab.fileName,
-        isDirty: tab.isDirty,
-        cursorPosition: tab.cursorPosition,
-        scrollPosition: tab.scrollPosition,
-      }))
-
+    let saving = false
+    const save = async () => {
+      if (saving) return
+      saving = true
       try {
-        await window.electron.drafts.saveAll(drafts)
+        const result = await window.electron.drafts.saveSnapshot(buildRecoveryPayload())
+        if (!result.ok) throw new Error(result.error)
       } catch (error) {
-        console.error('Auto-save failed:', error)
+        await window.electron.file.showError(
+          'Auto-save Failed',
+          'Marxist could not update its recovery snapshot.',
+          error instanceof Error ? error.message : String(error)
+        )
+      } finally {
+        saving = false
       }
     }
-
-    const initialTimeout = setTimeout(saveDrafts, 5000)
-
-    intervalRef.current = setInterval(saveDrafts, AUTO_SAVE_INTERVAL)
-
+    const initial = window.setTimeout(() => void save(), 5_000)
+    const interval = window.setInterval(() => void save(), AUTO_SAVE_INTERVAL)
     return () => {
-      clearTimeout(initialTimeout)
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
+      window.clearTimeout(initial)
+      window.clearInterval(interval)
     }
   }, [enabled])
 }
