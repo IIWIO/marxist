@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useAIStore } from '@/stores/aiStore'
 
 describe('aiStore', () => {
@@ -7,9 +7,7 @@ describe('aiStore', () => {
       chatHistories: new Map(),
       isLoading: false,
       isStreaming: false,
-      currentStreamContent: '',
       error: null,
-      abortController: null,
     })
   })
 
@@ -116,41 +114,4 @@ describe('aiStore', () => {
     })
   })
 
-  describe('appendStreamContent', () => {
-    it('appends to current stream content', () => {
-      useAIStore.getState().setStreamContent('Hello')
-      useAIStore.getState().appendStreamContent(' World')
-
-      expect(useAIStore.getState().currentStreamContent).toBe('Hello World')
-    })
-  })
-
-  describe('cancelStream', () => {
-    it('resets streaming state', () => {
-      const controller = new AbortController()
-      useAIStore.setState({
-        abortController: controller,
-        isStreaming: true,
-        isLoading: true,
-        currentStreamContent: 'Some content',
-      })
-
-      useAIStore.getState().cancelStream()
-
-      expect(useAIStore.getState().isStreaming).toBe(false)
-      expect(useAIStore.getState().isLoading).toBe(false)
-      expect(useAIStore.getState().currentStreamContent).toBe('')
-      expect(useAIStore.getState().abortController).toBeNull()
-    })
-
-    it('calls abort on controller', () => {
-      const controller = new AbortController()
-      const abortSpy = vi.spyOn(controller, 'abort')
-
-      useAIStore.setState({ abortController: controller })
-      useAIStore.getState().cancelStream()
-
-      expect(abortSpy).toHaveBeenCalled()
-    })
-  })
 })

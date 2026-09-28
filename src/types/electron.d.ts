@@ -1,4 +1,4 @@
-import type { ElectronAPI } from '../preload/index'
+import type { ElectronAPI } from './ipc'
 
 declare global {
   interface Window {

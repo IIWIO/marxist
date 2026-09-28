@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
-import appIcon from '@/../assets/app_icon/marksist_icon_round.png'
+import appIcon from '../../../../assets/app_icon/marksist_icon_round.png'
 
 export default function AboutSection() {
   const [appVersion, setAppVersion] = useState('1.0.0')
 
   useEffect(() => {
     if (window.electron?.app?.getVersion) {
-      window.electron.app.getVersion().then(setAppVersion).catch(() => {})
+      window.electron.app.getVersion().then((result) => {
+        if (result.ok) setAppVersion(result.value)
+      })
     }
   }, [])
 
@@ -30,6 +32,13 @@ export default function AboutSection() {
         A beautiful Markdown editor for macOS with AI-powered assistance.
       </p>
 
+      <button
+        className="mt-4 rounded border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600"
+        onClick={() => void window.electron.app.copyDiagnostics()}
+      >
+        Copy diagnostics
+      </button>
+
       <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 w-full">
         <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-2">
           Created with love by IIWIO
@@ -38,7 +47,7 @@ export default function AboutSection() {
           href="#"
           onClick={(e) => {
             e.preventDefault()
-            window.electron?.file?.openExternal?.('https://www.iiwio.com') || window.open('https://www.iiwio.com', '_blank')
+            void window.electron.file.openExternal('https://www.iiwio.com')
           }}
           className="text-sm text-accent dark:text-accent-dark hover:underline"
         >

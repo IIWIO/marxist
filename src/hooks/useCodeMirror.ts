@@ -1,6 +1,7 @@
-import { useRef, useEffect, useCallback } from 'react'
-import { EditorState, Compartment } from '@codemirror/state'
+import { useRef, useEffect, useCallback, useMemo } from 'react'
+import { EditorState, Compartment, Transaction } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
+import { openSearchPanel } from '@codemirror/search'
 import { createExtensions, ExtensionConfig } from '@/components/Editor/extensions'
 import type { EditorRef, EditorSnapshot } from '@/types/editor'
 
@@ -33,6 +34,8 @@ export function useCodeMirror(
       wordWrap: options.wordWrap,
       readOnly: options.readOnly,
       onUpdate: options.onChange,
+      spellCheck: options.spellCheck,
+      diffResult: options.diffResult,
     })
 
     const state = EditorState.create({
@@ -67,6 +70,8 @@ export function useCodeMirror(
       wordWrap: options.wordWrap,
       readOnly: options.readOnly,
       onUpdate: options.onChange,
+      spellCheck: options.spellCheck,
+      diffResult: options.diffResult,
     })
 
     viewRef.current.dispatch({
@@ -79,6 +84,8 @@ export function useCodeMirror(
     options.wordWrap,
     options.readOnly,
     options.onChange,
+    options.spellCheck,
+    options.diffResult,
   ])
 
   const getContent = useCallback((): string => {
@@ -94,6 +101,7 @@ export function useCodeMirror(
         to: viewRef.current.state.doc.length,
         insert: content,
       },
+      annotations: Transaction.addToHistory.of(false),
     })
   }, [])
 
@@ -126,6 +134,7 @@ export function useCodeMirror(
         anchor: Math.min(snapshot.selection.anchor, snapshot.content.length),
         head: Math.min(snapshot.selection.head, snapshot.content.length),
       },
+      annotations: Transaction.addToHistory.of(false),
     })
 
     requestAnimationFrame(() => {
@@ -152,13 +161,47 @@ export function useCodeMirror(
     })
   }, [])
 
-  return {
-    view: viewRef.current,
-    getContent,
-    setContent,
-    getSnapshot,
-    restoreSnapshot,
-    focus,
-    setReadOnly,
-  }
+  const getState = useCallback(() => viewRef.current?.state || null, [])
+
+  const restoreState = useCallback(
+    (state: EditorState | null, content: string, cursor: number, scrollTop: number): void => {
+      const view = viewRef.current
+      if (!view) return
+      if (state) view.setState(state)
+      if (view.state.doc.toString() !== content) {
+        view.dispatch({
+          changes: { from: 0, to: view.state.doc.length, insert: content },
+          annotations: Transaction.addToHistory.of(false),
+        })
+      }
+      const position = Math.min(cursor, view.state.doc.length)
+      view.dispatch({ selection: { anchor: position } })
+      requestAnimationFrame(() => {
+        view.scrollDOM.scrollTop = scrollTop
+      })
+    },
+    []
+  )
+
+  const find = useCallback((): void => {
+    if (viewRef.current) openSearchPanel(viewRef.current)
+  }, [])
+
+  return useMemo(
+    () => ({
+      get view() {
+        return viewRef.current
+      },
+      getContent,
+      setContent,
+      getSnapshot,
+      restoreSnapshot,
+      focus,
+      setReadOnly,
+      getState,
+      restoreState,
+      find,
+    }),
+    [find, focus, getContent, getSnapshot, getState, restoreSnapshot, restoreState, setContent, setReadOnly]
+  )
 }

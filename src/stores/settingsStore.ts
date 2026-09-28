@@ -1,143 +1,133 @@
 import { create } from 'zustand'
+import type { AIModel, PublicSettingKey, PublicSettings } from '@/types/ipc'
 
-export interface Settings {
-  theme: 'system' | 'light' | 'dark'
-  editorFontSize: number
-  previewFontSize: number
-  openRouterApiKey: string
-  selectedModel: string
-  systemPrompt: string
-  isApiKeyVerified: boolean
-  availableModels: Array<{ id: string; name: string; contextLength: number }>
-  lineNumbers: boolean
-  wordWrap: boolean
-  spellCheck: boolean
-}
-
-interface SettingsState extends Settings {
+interface SettingsState extends PublicSettings {
+  apiKeyInput: string
+  availableModels: AIModel[]
   isLoading: boolean
   isModalOpen: boolean
   activeTab: 'appearance' | 'ai' | 'editor' | 'about'
-
   openModal: () => void
   closeModal: () => void
   setActiveTab: (tab: SettingsState['activeTab']) => void
   loadSettings: () => Promise<void>
-  updateSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => Promise<void>
-  setApiKeyVerified: (verified: boolean, models?: Settings['availableModels']) => Promise<void>
+  updateSetting: <K extends PublicSettingKey>(key: K, value: PublicSettings[K]) => Promise<void>
+  setApiKeyInput: (value: string) => void
+  storeApiKey: () => Promise<{ ok: true } | { ok: false; error: string }>
+  setApiKeyVerified: (verified: boolean, models?: AIModel[]) => Promise<void>
   resetToDefaults: () => Promise<void>
 }
 
-const DEFAULT_SYSTEM_PROMPT = `You are a helpful writing assistant. Help the user improve their Markdown documents. Be concise and direct in your responses.
-
-When asked to edit the document:
-- Return the COMPLETE modified document as raw Markdown
-- Do not include explanations unless asked
-- Preserve the overall structure and formatting`
-
-export const useSettingsStore = create<SettingsState>()((set) => ({
+const initialSettings: PublicSettings = {
   theme: 'system',
   editorFontSize: 14,
   previewFontSize: 16,
-  openRouterApiKey: '',
-  selectedModel: 'anthropic/claude-sonnet-4-20250514',
-  systemPrompt: DEFAULT_SYSTEM_PROMPT,
-  isApiKeyVerified: false,
-  availableModels: [],
   lineNumbers: false,
   wordWrap: true,
   spellCheck: true,
+  selectedModel: 'anthropic/claude-sonnet-4-20250514',
+  systemPrompt: 'You are a helpful writing assistant. Help the user improve their Markdown documents.',
+  recentFiles: [],
+  hasApiKey: false,
+  isApiKeyVerified: false,
+}
 
+function publicPatch(settings: PublicSettings): Partial<SettingsState> {
+  return { ...settings, apiKeyInput: '' }
+}
+
+async function reportSettingsError(error: unknown): Promise<void> {
+  const message = error instanceof Error ? error.message : String(error)
+  await window.electron.file.showError(
+    'Settings Failed',
+    'Marxist could not save or load your settings.',
+    message
+  )
+}
+
+export const useSettingsStore = create<SettingsState>()((set, get) => ({
+  ...initialSettings,
+  apiKeyInput: '',
+  availableModels: [],
   isLoading: true,
   isModalOpen: false,
   activeTab: 'appearance',
 
   openModal: () => set({ isModalOpen: true }),
   closeModal: () => set({ isModalOpen: false, activeTab: 'appearance' }),
-  setActiveTab: (tab) => set({ activeTab: tab }),
+  setActiveTab: (activeTab) => set({ activeTab }),
 
   loadSettings: async () => {
     try {
-      const settings = await window.electron.settings.get()
-      set({
-        theme: settings.theme,
-        editorFontSize: settings.editorFontSize,
-        previewFontSize: settings.previewFontSize,
-        openRouterApiKey: settings.openRouterApiKey,
-        selectedModel: settings.selectedModel || 'anthropic/claude-sonnet-4-20250514',
-        systemPrompt: settings.systemPrompt || DEFAULT_SYSTEM_PROMPT,
-        lineNumbers: settings.lineNumbers,
-        wordWrap: settings.wordWrap,
-        spellCheck: settings.spellCheck,
-        isLoading: false,
-        isApiKeyVerified: settings.isApiKeyVerified || false,
-      })
+      const result = await window.electron.settings.get()
+      if (!result.ok) {
+        await reportSettingsError(result.error)
+        set({ isLoading: false })
+        return
+      }
+      set({ ...publicPatch(result.value), isLoading: false })
     } catch (error) {
-      console.error('Failed to load settings:', error)
+      await reportSettingsError(error)
       set({ isLoading: false })
     }
   },
 
   updateSetting: async (key, value) => {
+    const previous = get()[key]
     set({ [key]: value } as Partial<SettingsState>)
-
-    const persistableKeys = [
-      'theme',
-      'editorFontSize',
-      'previewFontSize',
-      'openRouterApiKey',
-      'selectedModel',
-      'systemPrompt',
-      'lineNumbers',
-      'wordWrap',
-      'spellCheck',
-      'isApiKeyVerified',
-    ] as const
-
-    if (persistableKeys.includes(key as typeof persistableKeys[number])) {
-      try {
-        await window.electron.settings.set(
-          key as Parameters<typeof window.electron.settings.set>[0],
-          value
-        )
-      } catch (error) {
-        console.error(`Failed to save setting ${key}:`, error)
+    try {
+      const result = await window.electron.settings.set(key, value)
+      if (result.ok) set(publicPatch(result.value))
+      else {
+        set({ [key]: previous } as Partial<SettingsState>)
+        await reportSettingsError(result.error)
       }
+    } catch (error) {
+      set({ [key]: previous } as Partial<SettingsState>)
+      await reportSettingsError(error)
     }
   },
 
-  setApiKeyVerified: async (verified, models = []) => {
-    set({ isApiKeyVerified: verified, availableModels: models })
+  setApiKeyInput: (apiKeyInput) => set({ apiKeyInput, isApiKeyVerified: false }),
+
+  storeApiKey: async () => {
     try {
-      await window.electron.settings.set('isApiKeyVerified', verified)
+      const result = await window.electron.settings.setApiKey(get().apiKeyInput)
+      if (!result.ok) return result
+      set(publicPatch(result.value))
+      return { ok: true }
     } catch (error) {
-      console.error('Failed to save API key verification status:', error)
+      return { ok: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  },
+
+  setApiKeyVerified: async (isApiKeyVerified, availableModels = []) => {
+    const previous = get().isApiKeyVerified
+    set({ isApiKeyVerified, availableModels })
+    try {
+      const result = await window.electron.settings.set('isApiKeyVerified', isApiKeyVerified)
+      if (!result.ok) {
+        set({ isApiKeyVerified: previous })
+        await reportSettingsError(result.error)
+      }
+    } catch (error) {
+      set({ isApiKeyVerified: previous })
+      await reportSettingsError(error)
     }
   },
 
   resetToDefaults: async () => {
     try {
-      const defaults = await window.electron.settings.reset()
-      set({
-        theme: defaults.theme,
-        editorFontSize: defaults.editorFontSize,
-        previewFontSize: defaults.previewFontSize,
-        openRouterApiKey: defaults.openRouterApiKey,
-        selectedModel: defaults.selectedModel,
-        systemPrompt: defaults.systemPrompt,
-        lineNumbers: defaults.lineNumbers,
-        wordWrap: defaults.wordWrap,
-        spellCheck: defaults.spellCheck,
-        isApiKeyVerified: false,
-        availableModels: [],
-      })
+      const result = await window.electron.settings.reset()
+      if (result.ok) set({ ...publicPatch(result.value), availableModels: [] })
+      else await reportSettingsError(result.error)
     } catch (error) {
-      console.error('Failed to reset settings:', error)
+      await reportSettingsError(error)
     }
   },
 }))
 
-export const selectIsModalOpen = (s: SettingsState) => s.isModalOpen
-export const selectTheme = (s: SettingsState) => s.theme
-export const selectEditorFontSize = (s: SettingsState) => s.editorFontSize
-export const selectPreviewFontSize = (s: SettingsState) => s.previewFontSize
+export const selectIsModalOpen = (state: SettingsState) => state.isModalOpen
+export const selectTheme = (state: SettingsState) => state.theme
+export const selectEditorFontSize = (state: SettingsState) => state.editorFontSize
+export const selectPreviewFontSize = (state: SettingsState) => state.previewFontSize

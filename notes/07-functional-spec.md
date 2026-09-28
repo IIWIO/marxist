@@ -11,7 +11,7 @@
 
 ## 1. Product Summary
 
-Marxist is a standalone macOS Markdown editor built with Electron. It provides three viewing modes (Markdown, Split, Render), syntax-highlighted editing with IBM Plex Mono, GitHub-styled rendering, a tab-based file sidebar with session persistence, and an AI assistant panel powered by OpenRouter that can directly edit the document with real-time streaming and diff highlighting. The app ships with dark and light themes, a formatting toolbar with overflow, live word/letter counts, and a focused, professional writing experience. Manual save only — no auto-save.
+Marxist is a standalone macOS Markdown editor built with Electron. It provides three viewing modes (Markdown, Split, Render), syntax-highlighted editing, GitHub-styled rendering, a tab-based file sidebar with session persistence, and an AI assistant panel powered by OpenRouter that can apply validated document edits with diff highlighting. The app ships with dark and light themes, a formatting toolbar with overflow, live word/letter counts, and a focused, professional writing experience. Files are saved manually; unsaved recovery snapshots are automatic.
 
 ---
 
@@ -179,16 +179,16 @@ Marxist is a standalone macOS Markdown editor built with Electron. It provides t
 | AE-01 | AI can directly modify the document content (e.g., "fix my table") | P0 |
 | AE-02 | AI operates on the **full document** (determines what to change) | P0 |
 | AE-03 | Pre-edit snapshot saved for revert capability | P0 |
-| AE-04 | Editor locked to **read-only** during AI streaming | P0 |
-| AE-05 | Modified document streams in real-time, replacing editor content progressively | P0 |
-| AE-06 | After streaming: line-level diff computed (pre-edit vs post-edit) | P0 |
+| AE-04 | Editor locked to **read-only** during AI edit generation | P0 |
+| AE-05 | Validated replacements apply atomically; invalid or ambiguous edits fail closed | P0 |
+| AE-06 | After validation: line-level diff computed (pre-edit vs post-edit) | P0 |
 | AE-07 | Added lines highlighted with **green** background | P0 |
 | AE-08 | Removed lines highlighted with **red** background | P0 |
 | AE-09 | **Banner across top of editor** with persistent Accept and Revert buttons | P0 |
 | AE-10 | Editor remains read-only until user clicks Accept or Revert | P0 |
 | AE-11 | **Accept**: commits changes, clears diff, unlocks editor, marks doc as dirty | P0 |
 | AE-12 | **Revert**: restores pre-edit snapshot, clears diff, unlocks editor | P0 |
-| AE-13 | AI stream can be cancelled mid-edit (reverts to pre-edit state) | P1 |
+| AE-13 | AI generation can be cancelled mid-edit (the original remains intact) | P1 |
 
 ### 2.10 File Operations
 
@@ -310,7 +310,7 @@ All design and architecture decisions confirmed during concept development:
 | 19 | Code block copy button | No — keep preview clean |
 | 20 | App personality | Professional and minimal |
 | 21 | Formatting toolbar behavior | Wrap selection, or insert placeholder if nothing selected |
-| 22 | AI can edit document | Yes — streams modified document in real-time |
+| 22 | AI can edit document | Yes — applies validated, anchored replacements atomically |
 | 23 | Editor during AI edit | Locked read-only |
 | 24 | AI edit diff | Green (added) / red (removed) line highlights |
 | 25 | Accept/Revert | Persistent banner at top of editor; user must choose before resuming |
@@ -356,10 +356,10 @@ All design and architecture decisions confirmed during concept development:
 - Settings panel: OpenRouter API key, verify, searchable model dropdown
 - Configurable system prompt with default
 - AI chat panel UI (per-file, reset, streaming)
-- AI document editing: streaming replacement, read-only lock
+- AI document editing: atomic validated replacement, read-only lock
 - Diff computation and line highlighting (green/red)
 - Accept/Revert banner
-- Error handling (failed streams, rate limits, interrupted edits)
+- Error handling (failed chat streams, rate limits, interrupted edits)
 
 ### Phase 5: Polish & Ship (Week 8)
 - All keyboard shortcuts

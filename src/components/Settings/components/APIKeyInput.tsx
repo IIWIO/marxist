@@ -8,6 +8,7 @@ interface APIKeyInputProps {
   isVerifying: boolean
   isVerified: boolean
   error: string | null
+  hasStoredKey?: boolean
 }
 
 export default function APIKeyInput({
@@ -17,6 +18,7 @@ export default function APIKeyInput({
   isVerifying,
   isVerified,
   error,
+  hasStoredKey = false,
 }: APIKeyInputProps) {
   const [showKey, setShowKey] = useState(false)
 
@@ -28,7 +30,7 @@ export default function APIKeyInput({
             type={showKey ? 'text' : 'password'}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="sk-or-v1-..."
+            placeholder={hasStoredKey ? 'Key stored securely — enter a new key to replace it' : 'sk-or-v1-...'}
             className={`
               w-full px-3 py-2 pr-10
               rounded-lg border

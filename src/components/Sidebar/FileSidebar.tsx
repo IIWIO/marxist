@@ -25,6 +25,7 @@ export default function FileSidebar() {
       `}
       style={{ width: '240px' }}
       aria-hidden={!sidebarOpen}
+      inert={!sidebarOpen}
     >
       <SidebarHeader />
       <FileList />

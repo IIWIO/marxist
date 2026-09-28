@@ -114,6 +114,7 @@ const iconMap: Record<string, string> = {
   more_horiz: moreHoriz,
   visibility: visibility,
   visibility_off: visibilityOff,
+  key: link,
 }
 
 const noShrinkIcons = ['format_h1', 'format_h2', 'format_h3', 'format_h4', 'code', 'code_blocks', 'strikethrough', 'strikethrough_s', 'format_strikethrough', 'format_bold', 'horizontal_rule']

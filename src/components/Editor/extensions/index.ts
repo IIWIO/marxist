@@ -12,6 +12,8 @@ import { bracketMatching } from '@codemirror/language'
 import { markdownExtension } from './markdown'
 import { allKeymaps } from './keybindings'
 import { listMarkerHighlight } from './listMarkerHighlight'
+import { diffHighlight } from './diffHighlight'
+import type { DiffResult } from '@/utils/diff'
 import { createEditorTheme, lightSyntaxHighlighting, darkSyntaxHighlighting } from '../themes'
 
 export interface ExtensionConfig {
@@ -20,6 +22,8 @@ export interface ExtensionConfig {
   showLineNumbers: boolean
   wordWrap: boolean
   readOnly?: boolean
+  spellCheck?: boolean
+  diffResult?: DiffResult | null
   onUpdate?: (content: string) => void
 }
 
@@ -44,6 +48,8 @@ export function createExtensions(config: ExtensionConfig): Extension[] {
     config.isDark ? darkSyntaxHighlighting : lightSyntaxHighlighting,
 
     listMarkerHighlight(config.isDark),
+    EditorView.contentAttributes.of({ spellcheck: String(config.spellCheck ?? true) }),
+    diffHighlight(config.diffResult || null),
   ]
 
   if (config.showLineNumbers) {

@@ -1,63 +1,41 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { act, renderHook } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { useAutoSave } from '@/hooks/useAutoSave'
 import { useEditorStore } from '@/stores/editorStore'
+import { mockElectronAPI } from '../setup'
+import type { DraftSnapshot } from '@/types/ipc'
 
-describe('useAutoSave draft preparation', () => {
+describe('useAutoSave', () => {
   beforeEach(() => {
-    useEditorStore.setState({
-      tabs: new Map(),
-      activeTabId: null,
-      untitledCounter: 0,
-      wordCount: 0,
-      letterCount: 0,
-    })
+    vi.useFakeTimers()
+    vi.clearAllMocks()
+    useEditorStore.setState({ tabs: new Map(), activeTabId: null, untitledCounter: 0 })
+    mockElectronAPI.drafts.saveSnapshot.mockResolvedValue({ ok: true, value: undefined })
   })
 
-  it('prepares draft data from tabs', () => {
-    useEditorStore.getState().createTab('/path/file.md', 'content 1')
-    useEditorStore.getState().createTab(null, 'content 2')
-
-    const { tabs } = useEditorStore.getState()
-    const drafts = Array.from(tabs.values()).map((tab) => ({
-      tabId: tab.tabId,
-      content: tab.content,
-      filePath: tab.filePath,
-      fileName: tab.fileName,
-      isDirty: tab.isDirty,
-      cursorPosition: tab.cursorPosition,
-      scrollPosition: tab.scrollPosition,
-    }))
-
-    expect(drafts.length).toBe(2)
-    expect(drafts.some(d => d.filePath === '/path/file.md')).toBe(true)
-    expect(drafts.some(d => d.filePath === null)).toBe(true)
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
-  it('includes dirty state in draft data', () => {
-    const tabId = useEditorStore.getState().createTab('/path/file.md', 'original')
-    useEditorStore.getState().markTabSaved(tabId)
-    useEditorStore.getState().updateTabContent(tabId, 'modified')
+  it('invsaves only dirty or untitled recovery content after the initial delay', async () => {
+    useEditorStore.getState().createTab('/path/clean.md', 'clean')
+    const dirty = useEditorStore.getState().createTab('/path/dirty.md', 'saved')
+    useEditorStore.getState().updateTabContent(dirty, 'changedd')
+    useEditorStore.getState().createTab(null, 'untitled')
+    renderHook(() => useAutoSave(true))
 
-    const tab = useEditorStore.getState().tabs.get(tabId)
+    await act(async () => vi.advanceTimersByTimeAsync(5_000))
 
-    expect(tab?.isDirty).toBe(true)
-    expect(tab?.content).toBe('modified')
+    expect(mockElectronAPI.drafts.saveSnapshot).toHaveBeenCalledOnce()
+    const payload = mockElectronAPI.drafts.saveSnapshot.mock.calls[0][0]
+    expect(payload.drafts).toHaveLength(2)
+    expect(payload.drafts.map((draft: DraftSnapshot) => draft.content)).toEqual(['changedd', 'untitled'])
+    expect(payload.session.tabs).toHaveLength(3)
   })
 
-  it('includes cursor and scroll positions', () => {
-    const tabId = useEditorStore.getState().createTab(null, 'content')
-    useEditorStore.getState().updateTabEditorState(tabId, null, 100, 50)
-
-    const tab = useEditorStore.getState().tabs.get(tabId)
-
-    expect(tab?.scrollPosition).toBe(100)
-    expect(tab?.cursorPosition).toBe(50)
-  })
-
-  it('returns empty array when no tabs', () => {
-    const { tabs } = useEditorStore.getState()
-    expect(tabs.size).toBe(0)
-
-    const drafts = Array.from(tabs.values())
-    expect(drafts.length).toBe(0)
+  it('does not schedule saves when disabled', async () => {
+    renderHook(() => useAutoSave(false))
+    await act(async () => vi.advanceTimersByTimeAsync(35_000))
+    expect(mockElectronAPI.drafts.saveSnapshot).not.toHaveBeenCalled()
   })
 })

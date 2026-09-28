@@ -7,7 +7,7 @@ export default function SidebarHeader() {
   return (
     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
       <span className="font-sans font-medium text-sm text-text-primary-light dark:text-text-primary-dark">
-        Recent Files
+        Open Files
       </span>
 
       <button

@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+.cm-ai-added-line {
+  background: color-mix(in srgb, #22c55e 18%, transparent);
+  box-shadow: inset 3px 0 0 #22c55e;
+}
+
+.cm-ai-removed-line {
+  box-sizing: border-box;
+  width: 100%;
+  padding-left: 8px;
+  overflow: hidden;
+  color: #b91c1c;
+  background: color-mix(in srgb, #ef4444 16%, transparent);
+  box-shadow: inset 3px 0 0 #ef4444;
+  text-decoration: line-through;
+  white-space: pre-wrap;
+}
+
+.dark .cm-ai-removed-line {
+  color: #fca5a5;
+}
+
 @font-face {
   font-family: 'Google Sans Flex';
   src: url('/assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf') format('truetype');

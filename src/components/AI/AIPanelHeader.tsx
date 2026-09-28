@@ -2,12 +2,12 @@ import Icon from '@/components/common/Icon'
 import Tooltip from '@/components/common/Tooltip'
 import { useViewStore } from '@/stores/viewStore'
 import { useSettingsStore } from '@/stores/settingsStore'
-import { useAIChat } from '@/hooks/useAIChat'
+import { useAIAgent } from '@/hooks/useAIAgent'
 
 export default function AIPanelHeader() {
   const toggleAiPanel = useViewStore((s) => s.toggleAiPanel)
   const selectedModel = useSettingsStore((s) => s.selectedModel)
-  const { resetConversation } = useAIChat()
+  const { resetConversation } = useAIAgent()
 
   const modelDisplayName = selectedModel.split('/').pop() || selectedModel
 

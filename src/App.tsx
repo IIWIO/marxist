@@ -14,6 +14,7 @@ import { useDragAndDrop } from './hooks/useDragAndDrop'
 import { useSessionRestore } from './hooks/useSessionRestore'
 import { useAutoSave } from './hooks/useAutoSave'
 import { useQuitHandler } from './hooks/useQuitHandler'
+import { useDocumentCounts } from './hooks/useDocumentCounts'
 import type { EditorRef } from './types/editor'
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
     previewFontSize: 16,
     lineNumbers: false,
     wordWrap: true,
+    spellCheck: true,
   })
 
   const editorRef = useRef<EditorRef | null>(null)
@@ -38,6 +40,7 @@ function App() {
   const settingsPreviewFontSize = useSettingsStore((s) => s.previewFontSize)
   const settingsLineNumbers = useSettingsStore((s) => s.lineNumbers)
   const settingsWordWrap = useSettingsStore((s) => s.wordWrap)
+  const settingsSpellCheck = useSettingsStore((s) => s.spellCheck)
   const updateSetting = useSettingsStore((s) => s.updateSetting)
   const loadSettings = useSettingsStore((s) => s.loadSettings)
 
@@ -55,6 +58,7 @@ function App() {
   useAutoSave(isRestored)
 
   useQuitHandler()
+  useDocumentCounts(activeTab?.content || '')
 
   useWindowSize()
   useViewKeyboardShortcuts()
@@ -63,10 +67,8 @@ function App() {
   useEffect(() => {
     loadSettings()
 
-    window.electron.settings.get().then((loadedSettings) => {
-      if (loadedSettings.recentFiles) {
-        loadRecentFiles(loadedSettings.recentFiles)
-      }
+    window.electron.file.getRecent().then((result) => {
+      if (result.ok) loadRecentFiles(result.value)
     })
   }, [loadSettings, loadRecentFiles])
 
@@ -83,8 +85,9 @@ function App() {
       previewFontSize: settingsPreviewFontSize,
       lineNumbers: settingsLineNumbers,
       wordWrap: settingsWordWrap,
+      spellCheck: settingsSpellCheck,
     })
-  }, [settingsTheme, settingsEditorFontSize, settingsPreviewFontSize, settingsLineNumbers, settingsWordWrap])
+  }, [settingsTheme, settingsEditorFontSize, settingsPreviewFontSize, settingsLineNumbers, settingsWordWrap, settingsSpellCheck])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -122,7 +125,7 @@ function App() {
       useViewStore.getState().toggleAiPanel()
     })
     const unsubFind = window.electron.onMenuEvent('menu:find', () => {
-      editorRef.current?.focus()
+      editorRef.current?.find()
     })
     const unsubSettings = window.electron.onMenuEvent('menu:settings', openSettingsModal)
     const unsubToggleTheme = window.electron.onMenuEvent('menu:toggle-theme', cycleTheme)
@@ -180,6 +183,7 @@ function App() {
           previewFontSize={editorSettings.previewFontSize}
           lineNumbers={editorSettings.lineNumbers}
           wordWrap={editorSettings.wordWrap}
+          spellCheck={editorSettings.spellCheck}
           editorRef={editorRef}
         />
       </main>

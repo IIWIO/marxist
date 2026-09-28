@@ -65,7 +65,7 @@ export default function ChatInput({ disabled }: ChatInputProps) {
           placeholder={
             disabled
               ? 'Verify API key in Settings'
-              : 'Ask or edit...'
+              : 'Ask about your document or request an edit...'
           }
           disabled={disabled || isLoading || isEditing}
           rows={1}
@@ -99,13 +99,15 @@ export default function ChatInput({ disabled }: ChatInputProps) {
                     : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
               }
             `}
-            aria-label={isStreaming ? 'Cancel' : 'Send'}
+            aria-label={isStreaming ? 'Cancel' : 'Send message'}
           >
             <Icon name={isStreaming ? 'stop_circle' : 'send'} size={20} />
           </button>
         </div>
       </div>
-
+      <p className="mt-1.5 text-xs text-text-secondary-light dark:text-text-secondary-dark">
+        Press Enter to send · Shift+Enter for a new line
+      </p>
     </div>
   )
 }

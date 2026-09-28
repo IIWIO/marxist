@@ -15,7 +15,7 @@ Marxist is a focused, elegant Markdown editor for macOS. It is not trying to be 
 
 1. **Simplicity first.** Three views, one purpose: write Markdown well.
 2. **Beautiful defaults.** Dark/light mode, syntax-colored Markdown, GitHub-rendered output — looks great out of the box.
-3. **AI as an editor, not just a chatbot.** The AI can read and rewrite the document in real-time — not just suggest, but act.
+3. **AI as an editor, not just a chatbot.** The AI can propose validated, reversible document changes — not just suggest, but act.
 4. **No lock-in.** Files are just `.md` files on disk. No proprietary format. No database. No sync service.
 5. **Manual save.** No auto-save. The user is in control. Unsaved drafts are preserved in a temp folder for crash safety and session restore.
 

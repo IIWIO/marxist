@@ -6,10 +6,10 @@ import { useAIStore } from '@/stores/aiStore'
 const mockSendMessage = vi.fn()
 const mockCancelStream = vi.fn()
 
-vi.mock('@/hooks/useAIChat', () => ({
-  useAIChat: () => ({
-    sendMessage: mockSendMessage,
-    cancelStream: mockCancelStream,
+vi.mock('@/hooks/useAIAgent', () => ({
+  useAIAgent: () => ({
+    sendPrompt: mockSendMessage,
+    cancelRequest: mockCancelStream,
   }),
 }))
 

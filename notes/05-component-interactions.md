@@ -28,7 +28,7 @@
     editorState: EditorState | null, // CodeMirror state snapshot
     scrollPosition: number,
     preEditSnapshot: string | null, // for AI revert
-    isAIEditing: boolean,           // true while AI is streaming edits
+    isAIEditing: boolean,           // true while an AI edit is being generated
     showDiff: boolean,              // true after AI edit, before accept/revert
   }>,
   activeTabId: string,
@@ -287,10 +287,10 @@ Renderer detects edit intent (or all messages go through edit pipeline)
 Main process sends to OpenRouter with edit system prompt:
   "Return the COMPLETE modified document as raw Markdown."
     ↓
-Modified document streams back token by token
+Validated anchored replacements return as one atomic result
 Renderer replaces editor content progressively
     ↓
-Stream ends:
+Validation succeeds:
   1. Compute line-level diff: preEditSnapshot vs new content
   2. Highlight added lines (green background), removed lines (red background)
   3. editorStore: set showDiff = true, isAIEditing = false
@@ -376,7 +376,7 @@ Esc or close button dismisses the search panel
 | AI API key invalid | Inline error in settings, clear verified state |
 | AI request fails | Error message in chat panel, allow retry |
 | AI rate limited | Rate limit message in chat, suggest waiting |
-| AI stream interrupted | Show partial result, offer to revert to pre-edit state |
+| AI edit interrupted | Keep the original document and report that the edit was cancelled |
 | AI edit produces empty doc | Auto-revert, show error in chat |
 | Draft folder corrupted | Skip corrupted drafts on restore, log warning |
 | Very large file (>5MB) | Warn user, disable live preview, suggest Markdown-only view |

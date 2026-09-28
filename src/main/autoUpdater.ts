@@ -1,163 +1,97 @@
-import { autoUpdater, UpdateInfo } from 'electron-updater'
-import { app, dialog, BrowserWindow } from 'electron'
+import { app, BrowserWindow, dialog } from 'electron'
+import { autoUpdater, type UpdateInfo } from 'electron-updater'
+import { logger } from './services/logger'
 
-autoUpdater.logger = console
 autoUpdater.autoDownload = false
-autoUpdater.autoInstallOnAppQuit = true
+autoUpdater.autoInstallOnAppQuit = false
 
 let mainWindow: BrowserWindow | null = null
-let updateDownloaded = false
-let downloadedUpdateInfo: UpdateInfo | null = null
-let isUpdating = false
+let installRequested: (() => void) | null = null
+let downloaded = false
+let installing = false
 
 export function isInstallingUpdate(): boolean {
-  return isUpdating
+  return installing
 }
 
-export function initAutoUpdater(window: BrowserWindow): void {
+export function initAutoUpdater(window: BrowserWindow, onInstallRequested: () => void): void {
   mainWindow = window
-
-  autoUpdater.on('checking-for-update', () => {
-    console.log('Checking for update...')
+  installRequested = onInstallRequested
+  autoUpdater.on('checking-for-update', () => logger.info('update.check'))
+  autoUpdater.on('update-available', (info) => void showUpdateDialog(info))
+  autoUpdater.on('update-not-available', (info) =>
+    logger.info('update.not-available', { version: info.version })
+  )
+  autoUpdater.on('error', (error) => logger.error('update.error', error))
+  autoUpdater.on('download-progress', (progress) => {
+    mainWindow?.webContents.send('update:download-progress', {
+      percent: progress.percent,
+      bytesPerSecond: progress.bytesPerSecond,
+      transferred: progress.transferred,
+      total: progress.total,
+    })
   })
-
-  autoUpdater.on('update-available', (info: UpdateInfo) => {
-    console.log('Update available:', info.version)
-    showUpdateDialog(info)
+  autoUpdater.on('update-downloaded', (info) => {
+    downloaded = true
+    void showRestartDialog(info)
   })
-
-  autoUpdater.on('update-not-available', (info: UpdateInfo) => {
-    console.log('Update not available. Current version is up to date:', info.version)
-  })
-
-  autoUpdater.on('error', (err) => {
-    console.error('Error in auto-updater:', err)
-  })
-
-  autoUpdater.on('download-progress', (progressObj) => {
-    const message = `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}%`
-    console.log(message)
-    
-    if (mainWindow) {
-      mainWindow.webContents.send('update:download-progress', {
-        percent: progressObj.percent,
-        bytesPerSecond: progressObj.bytesPerSecond,
-        transferred: progressObj.transferred,
-        total: progressObj.total,
-      })
-    }
-  })
-
-  autoUpdater.on('update-downloaded', (info: UpdateInfo) => {
-    console.log('Update downloaded:', info.version)
-    updateDownloaded = true
-    downloadedUpdateInfo = info
-    showRestartDialog(info)
-  })
-
-  // Check for updates after a short delay on startup
-  setTimeout(() => {
-    checkForUpdates(false)
-  }, 5000)
-}
-
-export function isUpdateDownloaded(): boolean {
-  return updateDownloaded
-}
-
-export function installUpdateOnQuit(): void {
-  if (updateDownloaded) {
-    autoUpdater.quitAndInstall(false, true)
-  }
+  setTimeout(() => void checkForUpdates(false), 5_000)
 }
 
 async function showUpdateDialog(info: UpdateInfo): Promise<void> {
   const result = await dialog.showMessageBox({
     type: 'info',
     title: 'Update Available',
-    message: `A new version of Marxist is available!`,
-    detail: `Version ${info.version} is ready to download.\n\nWould you like to download it now?`,
+    message: 'A new version of Marxist is available.',
+    detail: `Version ${info.version} is ready to download.`,
     buttons: ['Download Now', 'Later'],
     defaultId: 0,
     cancelId: 1,
   })
-
-  if (result.response === 0) {
-    console.log('User chose to download update')
-    autoUpdater.downloadUpdate()
-  } else {
-    console.log('User chose to skip update')
-  }
+  if (result.response === 0) await autoUpdater.downloadUpdate()
 }
 
 async function showRestartDialog(info: UpdateInfo): Promise<void> {
   const result = await dialog.showMessageBox({
     type: 'info',
     title: 'Update Ready',
-    message: 'Update downloaded!',
-    detail: `Version ${info.version} has been downloaded.\n\nClick "Install & Restart" to apply the update now.`,
+    message: 'The update is ready to install.',
+    detail: `Version ${info.version} will restart Marxist after your recovery data is saved.`,
     buttons: ['Install & Restart', 'Later'],
     defaultId: 0,
     cancelId: 1,
   })
-
-  if (result.response === 0) {
-    console.log('User chose to restart and install update')
-    isUpdating = true
-    
-    // Force quit and install
-    setImmediate(() => {
-      try {
-        // Remove all listeners that might prevent quit
-        app.removeAllListeners('window-all-closed')
-        app.removeAllListeners('before-quit')
-        
-        // For unsigned apps, we need to be more forceful
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.destroy()
-        }
-        
-        // Use quitAndInstall with isSilent=true (no installer UI) and isForceRunAfter=true
-        autoUpdater.quitAndInstall(true, true)
-      } catch (error) {
-        console.error('Error during quitAndInstall:', error)
-        // Fallback: just quit and let autoInstallOnAppQuit handle it
-        app.quit()
-      }
-    })
-  } else {
-    console.log('User chose to install update later')
-  }
+  if (result.response === 0) installRequested?.()
 }
 
-export async function checkForUpdates(showNoUpdateDialog: boolean = true): Promise<void> {
+export function installDownloadedUpdate(): void {
+  if (!downloaded) return
+  installing = true
+  autoUpdater.quitAndInstall(false, true)
+}
+
+export async function checkForUpdates(showNoUpdateDialog = true): Promise<void> {
   try {
     const result = await autoUpdater.checkForUpdates()
-    
     if (showNoUpdateDialog && !result?.updateInfo) {
       await dialog.showMessageBox({
         type: 'info',
         title: 'No Updates',
-        message: 'You\'re up to date!',
+        message: 'You’re up to date.',
         detail: `Marxist ${app.getVersion()} is the latest version.`,
         buttons: ['OK'],
       })
     }
   } catch (error) {
-    console.error('Failed to check for updates:', error)
-    
+    logger.error('update.check', error)
     if (showNoUpdateDialog) {
       await dialog.showMessageBox({
         type: 'error',
         title: 'Update Check Failed',
-        message: 'Could not check for updates',
+        message: 'Could not check for updates.',
         detail: 'Please check your internet connection and try again.',
         buttons: ['OK'],
       })
     }
   }
-}
-
-export function getAutoUpdater() {
-  return autoUpdater
 }

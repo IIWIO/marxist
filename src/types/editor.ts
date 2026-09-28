@@ -1,4 +1,5 @@
 import type { EditorView } from '@codemirror/view'
+import type { EditorState } from '@codemirror/state'
 
 export interface EditorConfig {
   fontSize: number
@@ -22,6 +23,9 @@ export interface EditorRef {
   restoreSnapshot: (snapshot: EditorSnapshot) => void
   focus: () => void
   setReadOnly: (readOnly: boolean) => void
+  getState: () => EditorState | null
+  restoreState: (state: EditorState | null, content: string, cursor: number, scrollTop: number) => void
+  find: () => void
 }
 
 export type FormattingAction =

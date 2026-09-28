@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { FileSidebar } from '@/components/Sidebar'
 import { useViewStore } from '@/stores/viewStore'
 import { useEditorStore } from '@/stores/editorStore'
+import { useFileStore } from '@/stores/fileStore'
 
 describe('FileSidebar', () => {
   beforeEach(() => {
@@ -14,20 +15,21 @@ describe('FileSidebar', () => {
       wordCount: 0,
       letterCount: 0,
     })
+    useFileStore.setState({ recentFiles: [] })
   })
 
   it('renders when sidebar is open', () => {
     useEditorStore.getState().createTab(null, 'test')
     render(<FileSidebar />)
 
-    expect(screen.getByText('Recent Files')).toBeInTheDocument()
+    expect(screen.getByText('Open Files')).toBeInTheDocument()
   })
 
   it('does not render in Render view (FS-13)', () => {
     useViewStore.setState({ activeView: 'render' })
     render(<FileSidebar />)
 
-    expect(screen.queryByText('Recent Files')).not.toBeInTheDocument()
+    expect(screen.queryByText('Open Files')).not.toBeInTheDocument()
   })
 
   it('renders in Markdown view', () => {
@@ -35,7 +37,7 @@ describe('FileSidebar', () => {
     useEditorStore.getState().createTab(null, 'test')
     render(<FileSidebar />)
 
-    expect(screen.getByText('Recent Files')).toBeInTheDocument()
+    expect(screen.getByText('Open Files')).toBeInTheDocument()
   })
 
   it('renders in Split view', () => {
@@ -43,7 +45,7 @@ describe('FileSidebar', () => {
     useEditorStore.getState().createTab(null, 'test')
     render(<FileSidebar />)
 
-    expect(screen.getByText('Recent Files')).toBeInTheDocument()
+    expect(screen.getByText('Open Files')).toBeInTheDocument()
   })
 
   it('shows file tabs with names (FS-07)', () => {
@@ -80,7 +82,7 @@ describe('FileSidebar', () => {
 
     render(<FileSidebar />)
 
-    const activeItem = screen.getByText('Untitled 2').closest('button')
+    const activeItem = screen.getByText('Untitled 2').closest('[title]')
     expect(activeItem).toHaveClass('bg-accent/10')
   })
 
@@ -112,6 +114,16 @@ describe('FileSidebar', () => {
     expect(screen.getByText('No files open')).toBeInTheDocument()
   })
 
+  it('shows persisted recent files that are not currently open', () => {
+    useFileStore.setState({
+      recentFiles: [{ path: '/path/recent.md', name: 'recent.md', lastOpened: new Date().toISOString() }],
+    })
+    render(<FileSidebar />)
+
+    expect(screen.getByRole('region', { name: 'Recent files' })).toBeInTheDocument()
+    expect(screen.getByText('recent.md')).toBeInTheDocument()
+  })
+
   it('displays multiple tabs in correct order (most recent first)', () => {
     useEditorStore.getState().createTab('/path/first.md', 'first')
     useEditorStore.getState().createTab('/path/second.md', 'second')
@@ -137,7 +149,7 @@ describe('FileSidebar', () => {
     useEditorStore.getState().createTab('/path/to/deep/file.md', 'content')
     render(<FileSidebar />)
 
-    const button = screen.getByText('file.md').closest('button')
+    const button = screen.getByText('file.md').closest('[title]')
     expect(button).toHaveAttribute('title', '/path/to/deep/file.md')
   })
 
@@ -145,7 +157,7 @@ describe('FileSidebar', () => {
     useEditorStore.getState().createTab(null, 'content')
     render(<FileSidebar />)
 
-    const button = screen.getByText('Untitled').closest('button')
+    const button = screen.getByText('Untitled').closest('[title]')
     expect(button).toHaveAttribute('title', 'Untitled')
   })
 })

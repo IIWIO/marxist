@@ -58,7 +58,6 @@ directories:
 
 files:
   - "out/**/*"
-  - "!node_modules/**/*"
 
 extraResources:
   - from: "assets/fonts"

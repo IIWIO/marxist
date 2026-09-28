@@ -190,11 +190,11 @@ These icons are present in **all views** that show the editor. In render-only vi
 - Switching files switches the conversation
 - Reset icon clears conversation for the current file only
 
-### AI Edit Mode (Active During Streaming)
+### AI Edit Mode (Active During Generation)
 When the AI is editing the document:
 1. Editor becomes **read-only** (locked)
-2. Changes stream in real-time
-3. After streaming completes: **banner across top of editor** with Accept / Revert buttons
+2. The original document remains unchanged while the response is generated and validated
+3. After validation succeeds, changes apply atomically and a **banner across top of editor** offers Accept / Revert
 4. Changed lines are highlighted: **green for added, red for removed**
 5. User must click Accept or Revert to proceed
 6. Accept: commits changes, clears diff highlights, unlocks editor
